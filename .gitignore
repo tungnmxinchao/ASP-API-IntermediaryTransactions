@@ -1,0 +1,38 @@
+# Visual Studio
+.vs/
+*.sln
+*.user
+*.suo
+*.ncb
+*.aps
+*.pch
+*.idb
+*.opendb
+*.tlog
+*.log
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.jfm.json
+*.pdb
+*.cache
+*.dbmdl
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Others
+*.d.ts
+*.js.map
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+node_modules/
