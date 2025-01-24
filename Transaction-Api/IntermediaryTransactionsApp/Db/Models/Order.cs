@@ -33,7 +33,7 @@ namespace IntermediaryTransactionsApp.Db.Models
 		public bool IsPaidToSeller { get; set; } = false;
 
 		public int Customer { get; set; }
-		public virtual User CustomerUser { get; set; }
+		public virtual Users CustomerUser { get; set; }
 
 		public string ShareLink { get; set; }
 

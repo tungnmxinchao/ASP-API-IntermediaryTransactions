@@ -27,7 +27,7 @@ namespace IntermediaryTransactionsApp.Db.Models
 		public string Payload { get; set; }
 
 		public int UserId { get; set; }
-		public virtual User User { get; set; }
+		public virtual Users User { get; set; }
 		public string OnDoneLink { get; set; }
 	}
 }

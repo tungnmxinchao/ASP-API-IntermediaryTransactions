@@ -7,7 +7,7 @@ namespace IntermediaryTransactionsApp.Db.Models
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
 		public DbSet<OrderStatus> OrderStatuses { get; set; }
-		public DbSet<User> Users { get; set; }
+		public DbSet<Users> Users { get; set; }
 		public DbSet<LoginHistory> LoginHistories { get; set; }
 		public DbSet<Order> Orders { get; set; }
 		public DbSet<Message> Messages { get; set; }
@@ -29,7 +29,7 @@ namespace IntermediaryTransactionsApp.Db.Models
 			});
 
 		
-			modelBuilder.Entity<User>(entity =>
+			modelBuilder.Entity<Users>(entity =>
 			{
 				entity.ToTable("Users");
 				entity.HasKey(e => e.Id);

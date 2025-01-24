@@ -1,8 +1,16 @@
+using AutoMapper;
+using IntermediaryTransactionsApp.Config;
 using IntermediaryTransactionsApp.Db;
+using IntermediaryTransactionsApp.Interface.UserInterface;
+using IntermediaryTransactionsApp.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var mapperConfig = new MapperConfiguration(mc => mc.AddProfile(new MapperConfig()));
+IMapper mapper = mapperConfig.CreateMapper();
+builder.Services.AddSingleton(mapper);
 
+builder.Services.AddTransient<IUserService, UserService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
