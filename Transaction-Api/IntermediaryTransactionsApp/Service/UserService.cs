@@ -17,18 +17,18 @@ namespace IntermediaryTransactionsApp.Service
 			_mapper = mapper;
 		}
 
-		public CreateUserResponse CreateUser(CreateUserRequest createUserRequest)
+		public async Task<CreateUserResponse> CreateUser(CreateUserRequest createUserRequest)
 		{
 			if(createUserRequest != null)
 			{
 				var user = _mapper.Map<Users>(createUserRequest);
 
 				user.IsActive = true;
-				user.RoleId = 1;
+				user.RoleId = 2;
 				user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createUserRequest.PasswordHash);
 
-				_context.Add(user);
-				_context.SaveChanges();
+				await _context.AddAsync(user);
+				await _context.SaveChangesAsync();
 
 				var userResponse = _mapper.Map<CreateUserResponse>(user);
 
@@ -37,10 +37,10 @@ namespace IntermediaryTransactionsApp.Service
 			throw new Exception("User not found!");
 		}
 
-		public GetUserResponse GetUsersById(int id)
+		public async Task<GetUserResponse> GetUsersById(int id)
 		{
-			var user = _context.Users.Include(r => r.Role)
-				.FirstOrDefault(x => x.Id == id);
+			var user = await _context.Users.Include(r => r.Role)
+				.FirstOrDefaultAsync(x => x.Id == id);
 
 			if(user != null)
 			{

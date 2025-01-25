@@ -5,8 +5,8 @@ namespace IntermediaryTransactionsApp.Interface.UserInterface
 {
 	public interface IUserService
 	{
-		public CreateUserResponse CreateUser(CreateUserRequest createUserRequest);
+		public Task<CreateUserResponse> CreateUser(CreateUserRequest createUserRequest);
 
-		public GetUserResponse GetUsersById(int id);
+		public Task<GetUserResponse> GetUsersById(int id);
 	}
 }

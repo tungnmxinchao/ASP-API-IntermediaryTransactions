@@ -1,5 +1,7 @@
-﻿using AutoMapper;
+﻿using System.Net;
+using AutoMapper;
 using IntermediaryTransactionsApp.Db.Models;
+using IntermediaryTransactionsApp.Dtos.ApiDTO;
 using IntermediaryTransactionsApp.Dtos.UserDto;
 using IntermediaryTransactionsApp.Interface.UserInterface;
 using Microsoft.AspNetCore.Http;
@@ -21,24 +23,28 @@ namespace IntermediaryTransactionsApp.Controllers.User
 		}
 
 		[HttpPost]
-		public IActionResult CreateUser([FromBody] CreateUserRequest createUserRequest)
+		public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest createUserRequest)
 		{
-			var user = _userService.CreateUser(createUserRequest);
+			var user = await _userService.CreateUser(createUserRequest);
+
+			
 			if (user != null)
 			{
-				return CreatedAtAction(nameof(CreateUser), user);
+				ApiResponse<CreateUserResponse> apiResponse = new ApiResponse<CreateUserResponse>((int) HttpStatusCode.Created, "Add Successfully!", user);
+				return CreatedAtAction(nameof(CreateUser), apiResponse);
 			}
 			return BadRequest();
 
 		}
 		[HttpGet("{id}")]
-		public IActionResult GetUserById([FromRoute] int id)
+		public async Task<IActionResult> GetUserById([FromRoute] int id)
 		{
-			var user = _userService.GetUsersById(id);
+			var user = await _userService.GetUsersById(id);
 
 			if(user != null)
 			{
-				return Ok(user);
+				ApiResponse<GetUserResponse> apiResponse = new ApiResponse<GetUserResponse>((int)HttpStatusCode.OK, "Get Data Successfully!", user);
+				return Ok(apiResponse);
 			}
 			return BadRequest();
 		}
