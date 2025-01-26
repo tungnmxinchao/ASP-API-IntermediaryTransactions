@@ -44,12 +44,13 @@ namespace IntermediaryTransactionsApp.Service
 
 		public async Task<string> RefreshToken(string userId, string refreshToken)
 		{
-		
-			var storedRefreshToken = await _redisService.GetTokenAsync($"refreshToken:{userId}");
-			if (storedRefreshToken == null || storedRefreshToken != refreshToken)
+
+			var isValid = await ValidateRefreshToken(userId, refreshToken);
+			if (!isValid)
 			{
 				throw new UnauthorizedAccessException("Invalid refresh token.");
 			}
+
 			var user = await _dbContext.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id.ToString() == userId);
 			if (user == null)
 			{
@@ -67,6 +68,12 @@ namespace IntermediaryTransactionsApp.Service
 			var newAccessToken = GenerateAccessToken(claims);
 
 			return newAccessToken;
+		}
+
+		private async Task<bool> ValidateRefreshToken(string userId, string refreshToken)
+		{
+			var storedRefreshToken = await _redisService.GetTokenAsync($"refreshToken:{userId}");
+			return storedRefreshToken == refreshToken;
 		}
 	}
 }
