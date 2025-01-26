@@ -42,31 +42,6 @@ namespace IntermediaryTransactionsApp.Service
 			return Guid.NewGuid().ToString().Replace("-", "") + Guid.NewGuid().ToString().Replace("-", "");
 		}
 
-		public ClaimsPrincipal ValidateToken(string token)
-		{
-			var tokenHandler = new JwtSecurityTokenHandler();
-			var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
-			try
-			{
-				var claimsPrincipal = tokenHandler.ValidateToken(token, new TokenValidationParameters
-				{
-					ValidateIssuerSigningKey = true,
-					IssuerSigningKey = new SymmetricSecurityKey(key),
-					ValidateIssuer = true,
-					ValidateAudience = true,
-					ValidIssuer = _jwtSettings.Issuer,
-					ValidAudience = _jwtSettings.Audience,
-					ClockSkew = TimeSpan.Zero
-				}, out SecurityToken validatedToken);
-
-				return claimsPrincipal;
-			}
-			catch
-			{
-				return null;
-			}
-		}
-
 		public async Task<string> RefreshToken(string userId, string refreshToken)
 		{
 		
