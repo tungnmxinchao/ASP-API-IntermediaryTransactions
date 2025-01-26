@@ -2,8 +2,11 @@
 using AutoMapper;
 using IntermediaryTransactionsApp.Db.Models;
 using IntermediaryTransactionsApp.Dtos.ApiDTO;
+using IntermediaryTransactionsApp.Dtos.LoginDTO;
 using IntermediaryTransactionsApp.Dtos.UserDto;
 using IntermediaryTransactionsApp.Interface.UserInterface;
+using IntermediaryTransactionsApp.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,11 +18,16 @@ namespace IntermediaryTransactionsApp.Controllers.User
 	{
 		private readonly IMapper _mapper;
 		private readonly IUserService _userService;
+		private readonly AuthService _authService;
+		private readonly JwtService _jwtService;
 
-		public UsersController(IMapper mapper, IUserService userService)
+		public UsersController(IMapper mapper, IUserService userService,
+			AuthService authService, JwtService jwtService)
 		{
 			_mapper = mapper;
 			_userService = userService;
+			_authService = authService;
+			_jwtService = jwtService;
 		}
 
 		[HttpPost]
@@ -48,5 +56,32 @@ namespace IntermediaryTransactionsApp.Controllers.User
 			}
 			return BadRequest();
 		}
+
+		[HttpPost("login")]
+		public async Task<IActionResult> Login([FromBody] LoginRequest request)
+		{
+			var (accessToken, refreshToken) = await _authService.Login(request.Username, request.Password);
+			return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken });
+		}
+
+		[HttpPost("refresh-token")]
+		public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+		{
+			try
+			{
+				var accessToken = await _jwtService.RefreshToken(request.UserId, request.RefreshToken);
+
+				return Ok(new { AccessToken = accessToken });
+			}
+			catch (UnauthorizedAccessException ex)
+			{
+				return Unauthorized(new { Message = ex.Message });
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, new { Message = "An error occurred while refreshing token.", Details = ex.Message });
+			}
+		}
+
 	}
 }

@@ -2,15 +2,15 @@
 {
 	public class ApiResponse<T>
 	{
-		public int code {  get; set; }
-		public string message { get; set; }
-		public T data { get; set; }
+		public int Code {  get; set; }
+		public string Message { get; set; }
+		public T Data { get; set; }
 
 		public ApiResponse(int code, string message, T data)
 		{
-			this.code = code;
-			this.message = message;
-			this.data = data;
+			this.Code = code;
+			this.Message = message;
+			this.Data = data;
 		}
 	}
 }
