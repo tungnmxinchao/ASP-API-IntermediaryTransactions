@@ -52,11 +52,7 @@ namespace IntermediaryTransactionsApp.Service
 			return (accessToken, refreshToken);
 		}
 
-		public async Task<bool> ValidateRefreshToken(string userId, string refreshToken)
-		{
-			var storedRefreshToken = await _redisService.GetTokenAsync($"refreshToken:{userId}");
-			return storedRefreshToken == refreshToken;
-		}
+		
 
 	}
 }
