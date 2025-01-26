@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using IntermediaryTransactionsApp.Db.Models;
 using IntermediaryTransactionsApp.Dtos.UserDto;
+using IntermediaryTransactionsApp.Exceptions;
 using IntermediaryTransactionsApp.Interface.UserInterface;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,7 +35,7 @@ namespace IntermediaryTransactionsApp.Service
 
 				return userResponse;
 			}
-			throw new Exception("User not found!");
+			throw new ValidationException("CreateUserRequest cannot be null.");
 		}
 
 		public async Task<GetUserResponse> GetUsersById(int id)
@@ -47,7 +48,7 @@ namespace IntermediaryTransactionsApp.Service
 				var userResponse = _mapper.Map<GetUserResponse>(user);
 				return userResponse;
 			}
-			throw new Exception("Id of user not found");
+			throw new ObjectNotFoundException($"User with ID {id} not found.");
 		}
 	}
 }

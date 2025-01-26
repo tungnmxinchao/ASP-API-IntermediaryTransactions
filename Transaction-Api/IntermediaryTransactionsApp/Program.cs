@@ -3,6 +3,7 @@ using System.Text;
 using AutoMapper;
 using IntermediaryTransactionsApp.Config;
 using IntermediaryTransactionsApp.Db;
+using IntermediaryTransactionsApp.Exceptions;
 using IntermediaryTransactionsApp.Interface.UserInterface;
 using IntermediaryTransactionsApp.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -57,6 +58,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDatabaseService(builder.Configuration.GetConnectionString("DB"));
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

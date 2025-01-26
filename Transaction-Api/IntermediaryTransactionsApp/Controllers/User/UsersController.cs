@@ -61,26 +61,29 @@ namespace IntermediaryTransactionsApp.Controllers.User
 		public async Task<IActionResult> Login([FromBody] LoginRequest request)
 		{
 			var (accessToken, refreshToken) = await _authService.Login(request.Username, request.Password);
-			return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken });
+
+			var tokenResponse = new TokenResponse(accessToken, refreshToken);
+
+			ApiResponse<TokenResponse> apiResponse = new ApiResponse<TokenResponse>(
+				(int)HttpStatusCode.OK,
+				"Login Successfully!",
+				tokenResponse
+			);
+
+			return Ok(apiResponse);
 		}
 
 		[HttpPost("refresh-token")]
 		public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
 		{
-			try
-			{
-				var accessToken = await _jwtService.RefreshToken(request.UserId, request.RefreshToken);
+			var accessToken = await _jwtService.RefreshToken(request.UserId, request.RefreshToken);
 
-				return Ok(new { AccessToken = accessToken });
-			}
-			catch (UnauthorizedAccessException ex)
-			{
-				return Unauthorized(new { Message = ex.Message });
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(500, new { Message = "An error occurred while refreshing token.", Details = ex.Message });
-			}
+			var response = new ApiResponse<string>(
+			code: 200,
+			message: "Token refreshed successfully.",
+			data: accessToken);
+
+			return Ok(response);
 		}
 
 	}
