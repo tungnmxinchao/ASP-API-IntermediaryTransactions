@@ -5,8 +5,10 @@ using IntermediaryTransactionsApp.Config;
 using IntermediaryTransactionsApp.Db;
 using IntermediaryTransactionsApp.Exceptions;
 using IntermediaryTransactionsApp.Interface.UserInterface;
+using IntermediaryTransactionsApp.PolicyAuth;
 using IntermediaryTransactionsApp.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 
@@ -23,6 +25,7 @@ builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<JwtService>();
 builder.Services.AddTransient<AuthService>();
 builder.Services.AddTransient<RedisService>();
+builder.Services.AddSingleton<IAuthorizationHandler, SameUserAuthorizationHandler>();
 
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(options =>
@@ -49,6 +52,9 @@ builder.Services.AddAuthorization(options =>
 {
 	options.AddPolicy("AdminPolicy", policy =>
 		policy.RequireRole("Admin"));
+
+	options.AddPolicy("SameUserPolicy", policy =>
+		policy.Requirements.Add(new SameUserRequirement()));
 });
 
 builder.Services.AddControllers();

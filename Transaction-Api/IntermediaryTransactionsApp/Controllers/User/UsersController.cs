@@ -45,6 +45,7 @@ namespace IntermediaryTransactionsApp.Controllers.User
 
 		}
 		[HttpGet("{id}")]
+		[Authorize(Policy = "SameUserPolicy")]
 		public async Task<IActionResult> GetUserById([FromRoute] int id)
 		{
 			var user = await _userService.GetUsersById(id);
