@@ -14,6 +14,7 @@ namespace IntermediaryTransactionsApp.Dtos.UserDto
 
 		[Required]
 		[MaxLength(255)]
+		[EmailAddress]
 		public string Email { get; set; }
 
 	}
