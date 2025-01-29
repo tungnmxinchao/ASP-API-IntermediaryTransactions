@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Security.Claims;
 using AutoMapper;
 using IntermediaryTransactionsApp.Db.Models;
 using IntermediaryTransactionsApp.Dtos.ApiDTO;
@@ -86,6 +87,28 @@ namespace IntermediaryTransactionsApp.Controllers.User
 
 			return Ok(response);
 		}
+		[HttpPost("revoke-token")]
+		[Authorize]
+		public async Task<IActionResult> RevokeToken()
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (string.IsNullOrEmpty(userId))
+			{
+				return Unauthorized(new ApiResponse<string>(401, "Unauthorized. User ID not found.", null));
+			}
+			try
+			{
+				await _jwtService.RevokeRefreshToken(userId);
+
+				return Ok(new ApiResponse<string>(200, "Token revoked successfully.", null));
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, new ApiResponse<string>(500, "An error occurred while revoking the token.", ex.Message));
+			}
+		}
+
 
 	}
 }

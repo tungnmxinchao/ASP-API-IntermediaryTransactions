@@ -75,5 +75,12 @@ namespace IntermediaryTransactionsApp.Service
 			var storedRefreshToken = await _redisService.GetTokenAsync($"refreshToken:{userId}");
 			return storedRefreshToken == refreshToken;
 		}
+
+		public async Task RevokeRefreshToken(string userId)
+		{
+			var refreshTokenKey = $"refreshToken:{userId}";
+			await _redisService.RevokeTokenAsync(refreshTokenKey);
+		}
+
 	}
 }

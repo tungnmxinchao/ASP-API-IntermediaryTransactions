@@ -32,6 +32,12 @@ namespace IntermediaryTransactionsApp.Service
 			return storedToken == token;
 		}
 
+		public async Task RevokeTokenAsync(string key)
+		{
+			var db = _redis.GetDatabase();
+			await db.KeyDeleteAsync(key);
+		}
+
 
 	}
 }
