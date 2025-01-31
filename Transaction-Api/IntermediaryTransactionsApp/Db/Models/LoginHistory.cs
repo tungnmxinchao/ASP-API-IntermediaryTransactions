@@ -7,7 +7,7 @@ namespace IntermediaryTransactionsApp.Db.Models
 		public int Id { get; set; }
 
 		public int UserId { get; set; }
-		public virtual User User { get; set; }
+		public virtual Users User { get; set; }
 
 		[Required]
 		[MaxLength(45)]
