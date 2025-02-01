@@ -30,9 +30,8 @@ namespace IntermediaryTransactionsApp.Service
 			history.OnDoneAction = "";
 
 			await _context.AddAsync(history);
-			var rowAffected = await _context.SaveChangesAsync();
-
-			return rowAffected > 0;
+			
+			return true;
 
 		}
 	}

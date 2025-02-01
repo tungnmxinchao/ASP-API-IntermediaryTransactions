@@ -69,9 +69,8 @@ namespace IntermediaryTransactionsApp.Service
 			user.Money -= updateMoneyRequest.Money;
 
 			_context.Users.Update(user);
-			int rowAffected = await _context.SaveChangesAsync();
 
-			return rowAffected > 0;
+			return true;
 		}
 	}
 }

@@ -11,6 +11,7 @@ using IntermediaryTransactionsApp.Interface.MessageInterface;
 using IntermediaryTransactionsApp.Interface.UserInterface;
 using IntermediaryTransactionsApp.PolicyAuth;
 using IntermediaryTransactionsApp.Service;
+using IntermediaryTransactionsApp.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -36,6 +37,7 @@ builder.Services.AddSingleton<IAuthorizationHandler, SameUserAuthorizationHandle
 builder.Services.AddTransient<IOrderService, OrderService>();
 builder.Services.AddTransient<IMessageService, MessageService>();
 builder.Services.AddTransient<IHistoryService, HistoryService>();
+builder.Services.AddScoped<IUnitOfWorkCreateOrder, UnitOfWorkCreateOrder>();
 
 // Config jwt
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("JwtSettings"));

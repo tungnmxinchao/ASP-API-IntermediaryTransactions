@@ -32,9 +32,8 @@ namespace IntermediaryTransactionsApp.Service
 
 
 			await _context.AddAsync(message);
-			var rowAffected = await _context.SaveChangesAsync();
-
-			return rowAffected > 0;
+			
+			return true;
 		}
 	}
 }
