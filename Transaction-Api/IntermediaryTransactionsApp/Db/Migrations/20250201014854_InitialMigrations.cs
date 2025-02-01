@@ -51,6 +51,7 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Money = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     RoleId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -123,44 +124,43 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                 name: "Orders",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
                     DeletedBy = table.Column<int>(type: "int", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Contact = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Contact = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Description = table.Column<string>(type: "NVARCHAR(MAX)", nullable: false),
                     IsPublic = table.Column<bool>(type: "bit", nullable: false),
                     HiddenValue = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MoneyValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MoneyValue = table.Column<decimal>(type: "DECIMAL(18,2)", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     IsSellerChargeFee = table.Column<bool>(type: "bit", nullable: false),
                     IsPaidToSeller = table.Column<bool>(type: "bit", nullable: false),
-                    Customer = table.Column<int>(type: "int", nullable: false),
+                    Customer = table.Column<int>(type: "int", nullable: true),
                     ShareLink = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FeeOnSuccess = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalMoneyForBuyer = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SellerReceivedOnSuccess = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Updateable = table.Column<bool>(type: "bit", nullable: false),
-                    CustomerCanComplain = table.Column<bool>(type: "bit", nullable: false),
-                    OrderStatusId = table.Column<int>(type: "int", nullable: true),
-                    UserId = table.Column<int>(type: "int", nullable: true)
+                    FeeOnSuccess = table.Column<decimal>(type: "DECIMAL(18,2)", nullable: false),
+                    TotalMoneyForBuyer = table.Column<decimal>(type: "DECIMAL(18,2)", nullable: false),
+                    SellerReceivedOnSuccess = table.Column<decimal>(type: "DECIMAL(18,2)", nullable: false),
+                    Updateable = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    CustomerCanComplain = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Orders_OrderStatus_OrderStatusId",
-                        column: x => x.OrderStatusId,
-                        principalTable: "OrderStatus",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_Orders_OrderStatus_StatusId",
                         column: x => x.StatusId,
                         principalTable: "OrderStatus",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Orders_Users_CreatedBy",
+                        column: x => x.CreatedBy,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -169,11 +169,6 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Orders_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -219,24 +214,19 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_CreatedBy",
+                table: "Orders",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_Customer",
                 table: "Orders",
                 column: "Customer");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_OrderStatusId",
-                table: "Orders",
-                column: "OrderStatusId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Orders_StatusId",
                 table: "Orders",
                 column: "StatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Orders_UserId",
-                table: "Orders",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_RoleName",

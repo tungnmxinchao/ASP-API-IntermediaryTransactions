@@ -7,6 +7,7 @@ namespace IntermediaryTransactionsApp.Db.Models
 		public Guid Id { get; set; } = Guid.NewGuid();
 		public bool IsDelete { get; set; } = false;
 		public int CreatedBy { get; set; }
+		public Users CreatedByUser { get; set; }
 		public int? DeletedBy { get; set; }
 
 		public DateTime CreatedAt { get; set; } = DateTime.Now;
@@ -32,7 +33,7 @@ namespace IntermediaryTransactionsApp.Db.Models
 		public bool IsSellerChargeFee { get; set; } = false;
 		public bool IsPaidToSeller { get; set; } = false;
 
-		public int Customer { get; set; }
+		public int? Customer { get; set; }
 		public virtual Users CustomerUser { get; set; }
 
 		public string ShareLink { get; set; }

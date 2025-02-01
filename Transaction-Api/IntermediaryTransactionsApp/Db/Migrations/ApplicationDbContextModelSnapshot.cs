@@ -127,11 +127,13 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<string>("Contact")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -141,11 +143,13 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
-                    b.Property<int>("Customer")
+                    b.Property<int?>("Customer")
                         .HasColumnType("int");
 
                     b.Property<bool>("CustomerCanComplain")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -155,17 +159,19 @@ namespace IntermediaryTransactionsApp.Db.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("NVARCHAR(MAX)");
 
                     b.Property<decimal>("FeeOnSuccess")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("DECIMAL(18,2)");
 
                     b.Property<string>("HiddenValue")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDelete")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<bool>("IsPaidToSeller")
                         .HasColumnType("bit");
@@ -177,13 +183,10 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal>("MoneyValue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("OrderStatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("DECIMAL(18,2)");
 
                     b.Property<decimal>("SellerReceivedOnSuccess")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("DECIMAL(18,2)");
 
                     b.Property<string>("ShareLink")
                         .IsRequired()
@@ -194,31 +197,29 @@ namespace IntermediaryTransactionsApp.Db.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<decimal>("TotalMoneyForBuyer")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("DECIMAL(18,2)");
 
                     b.Property<bool>("Updateable")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
 
                     b.HasIndex("Customer");
 
-                    b.HasIndex("OrderStatusId");
-
                     b.HasIndex("StatusId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.OrderStatus", b =>
@@ -332,7 +333,7 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                     b.ToTable("TransactionHistory", (string)null);
                 });
 
-            modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.User", b =>
+            modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.Users", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -352,6 +353,9 @@ namespace IntermediaryTransactionsApp.Db.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<decimal>("Money")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -378,7 +382,7 @@ namespace IntermediaryTransactionsApp.Db.Migrations
 
             modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.LoginHistory", b =>
                 {
-                    b.HasOne("IntermediaryTransactionsApp.Db.Models.User", "User")
+                    b.HasOne("IntermediaryTransactionsApp.Db.Models.Users", "User")
                         .WithMany("LoginHistories")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -389,7 +393,7 @@ namespace IntermediaryTransactionsApp.Db.Migrations
 
             modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.Message", b =>
                 {
-                    b.HasOne("IntermediaryTransactionsApp.Db.Models.User", "User")
+                    b.HasOne("IntermediaryTransactionsApp.Db.Models.Users", "User")
                         .WithMany("Messages")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -400,15 +404,16 @@ namespace IntermediaryTransactionsApp.Db.Migrations
 
             modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.Order", b =>
                 {
-                    b.HasOne("IntermediaryTransactionsApp.Db.Models.User", "CustomerUser")
-                        .WithMany("CustomerOrders")
-                        .HasForeignKey("Customer")
+                    b.HasOne("IntermediaryTransactionsApp.Db.Models.Users", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("IntermediaryTransactionsApp.Db.Models.OrderStatus", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("OrderStatusId");
+                    b.HasOne("IntermediaryTransactionsApp.Db.Models.Users", "CustomerUser")
+                        .WithMany()
+                        .HasForeignKey("Customer")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("IntermediaryTransactionsApp.Db.Models.OrderStatus", "Status")
                         .WithMany()
@@ -416,9 +421,7 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("IntermediaryTransactionsApp.Db.Models.User", null)
-                        .WithMany("CreatedOrders")
-                        .HasForeignKey("UserId");
+                    b.Navigation("CreatedByUser");
 
                     b.Navigation("CustomerUser");
 
@@ -427,7 +430,7 @@ namespace IntermediaryTransactionsApp.Db.Migrations
 
             modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.TransactionHistory", b =>
                 {
-                    b.HasOne("IntermediaryTransactionsApp.Db.Models.User", "User")
+                    b.HasOne("IntermediaryTransactionsApp.Db.Models.Users", "User")
                         .WithMany("TransactionHistories")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -436,7 +439,7 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.User", b =>
+            modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.Users", b =>
                 {
                     b.HasOne("IntermediaryTransactionsApp.Db.Models.Role", "Role")
                         .WithMany("Users")
@@ -447,22 +450,13 @@ namespace IntermediaryTransactionsApp.Db.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.OrderStatus", b =>
-                {
-                    b.Navigation("Orders");
-                });
-
             modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.Role", b =>
                 {
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.User", b =>
+            modelBuilder.Entity("IntermediaryTransactionsApp.Db.Models.Users", b =>
                 {
-                    b.Navigation("CreatedOrders");
-
-                    b.Navigation("CustomerOrders");
-
                     b.Navigation("LoginHistories");
 
                     b.Navigation("Messages");

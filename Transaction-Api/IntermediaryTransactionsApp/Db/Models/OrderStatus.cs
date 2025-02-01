@@ -13,6 +13,5 @@ namespace IntermediaryTransactionsApp.Db.Models
 		[MaxLength(255)]
 		public string Description { get; set; }
 
-		public virtual ICollection<Order> Orders { get; set; }
 	}
 }

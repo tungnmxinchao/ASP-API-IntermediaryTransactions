@@ -66,27 +66,70 @@ namespace IntermediaryTransactionsApp.Db.Models
 					.OnDelete(DeleteBehavior.Cascade);
 			});
 
-	
+
 			modelBuilder.Entity<Order>(entity =>
 			{
-				entity.ToTable("Orders");
 				entity.HasKey(e => e.Id);
+
+				entity.Property(e => e.Id)
+					.HasDefaultValueSql("NEWID()");
+
+				entity.Property(e => e.IsDelete)
+					.IsRequired()
+					.HasDefaultValue(false);
+
+				entity.Property(e => e.CreatedAt)
+					.IsRequired()
+					.HasDefaultValueSql("GETDATE()");
+
 				entity.Property(e => e.Contact)
-					.IsRequired();
+					.IsRequired()
+					.HasMaxLength(255);
+
 				entity.Property(e => e.Title)
-					.IsRequired();
+					.IsRequired()
+					.HasMaxLength(255);
+
+				entity.Property(e => e.Description)
+					.HasColumnType("NVARCHAR(MAX)");
+
 				entity.Property(e => e.MoneyValue)
 					.IsRequired()
-					.HasColumnType("decimal(18,2)");
-				entity.Property(e => e.CreatedAt)
-					.HasDefaultValueSql("GETDATE()");
-				entity.HasOne(o => o.Status)
+					.HasColumnType("DECIMAL(18,2)");
+
+				entity.Property(e => e.FeeOnSuccess)
+					.IsRequired()
+					.HasColumnType("DECIMAL(18,2)");
+
+				entity.Property(e => e.TotalMoneyForBuyer)
+					.IsRequired()
+					.HasColumnType("DECIMAL(18,2)");
+
+				entity.Property(e => e.SellerReceivedOnSuccess)
+					.IsRequired()
+					.HasColumnType("DECIMAL(18,2)");
+
+				entity.Property(e => e.Updateable)
+					.IsRequired()
+					.HasDefaultValue(false);
+
+				entity.Property(e => e.CustomerCanComplain)
+					.IsRequired()
+					.HasDefaultValue(false);
+
+				entity.HasOne(u => u.CreatedByUser)
 					.WithMany()
-					.HasForeignKey(o => o.StatusId)
+					.HasForeignKey(e => e.CreatedBy)
 					.OnDelete(DeleteBehavior.Restrict);
-				entity.HasOne(o => o.CustomerUser)
-					.WithMany(u => u.CustomerOrders)
-					.HasForeignKey(o => o.Customer)
+
+				entity.HasOne(u => u.CustomerUser)
+					.WithMany()
+					.HasForeignKey(e => e.Customer)
+					.OnDelete(DeleteBehavior.Restrict);
+
+				entity.HasOne(s => s.Status)
+					.WithMany()
+					.HasForeignKey(e => e.StatusId)
 					.OnDelete(DeleteBehavior.Restrict);
 			});
 
