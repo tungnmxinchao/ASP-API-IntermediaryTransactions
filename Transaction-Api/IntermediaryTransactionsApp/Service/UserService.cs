@@ -27,6 +27,7 @@ namespace IntermediaryTransactionsApp.Service
 				user.IsActive = true;
 				user.RoleId = 2;
 				user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createUserRequest.PasswordHash);
+				user.Money = 0;
 
 				await _context.AddAsync(user);
 				await _context.SaveChangesAsync();
