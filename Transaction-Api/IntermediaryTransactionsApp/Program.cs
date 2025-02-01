@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 using AutoMapper;
 using IntermediaryTransactionsApp.Config;
 using IntermediaryTransactionsApp.Db;
@@ -17,13 +18,16 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Config mapper
 var mapperConfig = new MapperConfiguration(mc => mc.AddProfile(new MapperConfig()));
 IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
+// Config redis
 var redis = ConnectionMultiplexer.Connect("localhost:6379");
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 
+// Register services
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<JwtService>();
 builder.Services.AddTransient<AuthService>();
@@ -33,7 +37,7 @@ builder.Services.AddTransient<IOrderService, OrderService>();
 builder.Services.AddTransient<IMessageService, MessageService>();
 builder.Services.AddTransient<IHistoryService, HistoryService>();
 
-
+// Config jwt
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(options =>
 {
@@ -55,6 +59,7 @@ builder.Services.AddAuthentication(options =>
 	};
 });
 
+// Config authorizations with JWT
 builder.Services.AddAuthorization(options =>
 {
 	options.AddPolicy("AdminPolicy", policy =>
@@ -64,7 +69,12 @@ builder.Services.AddAuthorization(options =>
 		policy.Requirements.Add(new SameUserRequirement()));
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+	.AddJsonOptions(options =>
+	{
+		options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+	});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

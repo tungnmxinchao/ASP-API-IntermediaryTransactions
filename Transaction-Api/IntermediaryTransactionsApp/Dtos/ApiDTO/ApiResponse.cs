@@ -1,5 +1,6 @@
 ﻿namespace IntermediaryTransactionsApp.Dtos.ApiDTO
 {
+
 	public class ApiResponse<T>
 	{
 		public int Code {  get; set; }
