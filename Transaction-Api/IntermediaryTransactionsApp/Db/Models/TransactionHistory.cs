@@ -19,7 +19,7 @@ namespace IntermediaryTransactionsApp.Db.Models
 
 		[Required]
 		[Range(1, 3)]
-		public int TransactionType { get; set; } // 1: Payment, 2: Refund, 3: Other
+		public int TransactionType { get; set; }
 
 		public bool IsProcessed { get; set; } = false;
 		public string Note { get; set; }

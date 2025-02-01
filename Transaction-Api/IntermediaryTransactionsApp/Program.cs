@@ -4,6 +4,9 @@ using AutoMapper;
 using IntermediaryTransactionsApp.Config;
 using IntermediaryTransactionsApp.Db;
 using IntermediaryTransactionsApp.Exceptions;
+using IntermediaryTransactionsApp.Interface.HistoryInterface;
+using IntermediaryTransactionsApp.Interface.IOrderService;
+using IntermediaryTransactionsApp.Interface.MessageInterface;
 using IntermediaryTransactionsApp.Interface.UserInterface;
 using IntermediaryTransactionsApp.PolicyAuth;
 using IntermediaryTransactionsApp.Service;
@@ -26,6 +29,10 @@ builder.Services.AddTransient<JwtService>();
 builder.Services.AddTransient<AuthService>();
 builder.Services.AddTransient<RedisService>();
 builder.Services.AddSingleton<IAuthorizationHandler, SameUserAuthorizationHandler>();
+builder.Services.AddTransient<IOrderService, OrderService>();
+builder.Services.AddTransient<IMessageService, MessageService>();
+builder.Services.AddTransient<IHistoryService, HistoryService>();
+
 
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(options =>

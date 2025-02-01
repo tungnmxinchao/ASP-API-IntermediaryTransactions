@@ -8,5 +8,7 @@ namespace IntermediaryTransactionsApp.Interface.UserInterface
 		public Task<CreateUserResponse> CreateUser(CreateUserRequest createUserRequest);
 
 		public Task<GetUserResponse> GetUsersById(int id);
+
+		public Task<bool> UpdateMoney(UpdateMoneyRequest updateMoneyRequest);
 	}
 }

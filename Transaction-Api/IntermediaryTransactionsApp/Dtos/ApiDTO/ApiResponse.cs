@@ -12,5 +12,11 @@
 			this.Message = message;
 			this.Data = data;
 		}
+
+		public ApiResponse(int code, string message)
+		{
+			this.Code = code;
+			this.Message = message;
+		}
 	}
 }

@@ -51,5 +51,27 @@ namespace IntermediaryTransactionsApp.Service
 			}
 			throw new ObjectNotFoundException($"User with ID {id} not found.");
 		}
+
+		public async Task<bool> UpdateMoney(UpdateMoneyRequest updateMoneyRequest)
+		{
+			var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == updateMoneyRequest.UserId);
+
+			if (user == null)
+			{
+				throw new ObjectNotFoundException($"User with ID {user.Id} not found.");
+			}
+
+			if (user.Money < updateMoneyRequest.Money)
+			{
+				throw new ValidationException("Your money not enought!");
+			}			
+
+			user.Money -= updateMoneyRequest.Money;
+
+			_context.Users.Update(user);
+			int rowAffected = await _context.SaveChangesAsync();
+
+			return rowAffected > 0;
+		}
 	}
 }

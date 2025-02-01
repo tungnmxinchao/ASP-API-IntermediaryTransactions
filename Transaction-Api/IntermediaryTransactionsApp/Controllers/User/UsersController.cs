@@ -81,7 +81,7 @@ namespace IntermediaryTransactionsApp.Controllers.User
 			var accessToken = await _jwtService.RefreshToken(request.UserId, request.RefreshToken);
 
 			var response = new ApiResponse<string>(
-			code: 200,
+			code: (int)HttpStatusCode.OK,
 			message: "Token refreshed successfully.",
 			data: accessToken);
 
@@ -95,20 +95,18 @@ namespace IntermediaryTransactionsApp.Controllers.User
 
 			if (string.IsNullOrEmpty(userId))
 			{
-				return Unauthorized(new ApiResponse<string>(401, "Unauthorized. User ID not found.", null));
+				return Unauthorized(new ApiResponse<string>((int)HttpStatusCode.Unauthorized, "Unauthorized. User ID not found."));
 			}
 			try
 			{
 				await _jwtService.RevokeRefreshToken(userId);
 
-				return Ok(new ApiResponse<string>(200, "Token revoked successfully.", null));
+				return Ok(new ApiResponse<string>((int)HttpStatusCode.OK, "Token revoked successfully."));
 			}
 			catch (Exception ex)
 			{
-				return StatusCode(500, new ApiResponse<string>(500, "An error occurred while revoking the token.", ex.Message));
+				return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse<string>(500, "An error occurred while revoking the token.", ex.Message));
 			}
 		}
-
-
 	}
 }
