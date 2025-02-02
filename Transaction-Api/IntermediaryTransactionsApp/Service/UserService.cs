@@ -63,7 +63,7 @@ namespace IntermediaryTransactionsApp.Service
 
 			if (user.Money < updateMoneyRequest.Money)
 			{
-				throw new ValidationException("Your money not enought!");
+				throw new ValidationException("Your money not enough!");
 			}			
 
 			user.Money -= updateMoneyRequest.Money;

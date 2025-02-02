@@ -21,10 +21,11 @@ namespace IntermediaryTransactionsApp.Service
 		private readonly IMapper _mapper;
 		private readonly IHistoryService _historyService;
 		private readonly IUnitOfWorkCreateOrder _unitOfWorkCreateOrder;
+		private readonly JwtService _jwtService;
 
 		public OrderService(ApplicationDbContext context, IUserService userService, 
 			IMessageService messageService, IMapper mapper, IHistoryService historyService,
-			IUnitOfWorkCreateOrder unitOfWorkCreateOrder)
+			IUnitOfWorkCreateOrder unitOfWorkCreateOrder, JwtService jwtService)
 		{
 			_context = context;
 			_userService = userService;
@@ -32,6 +33,7 @@ namespace IntermediaryTransactionsApp.Service
 			_mapper = mapper;
 			_historyService = historyService;
 			_unitOfWorkCreateOrder = unitOfWorkCreateOrder;
+			_jwtService = jwtService;
 		}
 
 		public async Task<bool> CreateOrder(CreateOrderRequest request)
@@ -39,6 +41,12 @@ namespace IntermediaryTransactionsApp.Service
 			if (request == null)
 			{
 				throw new ArgumentNullException(nameof(request));
+			}
+
+			var userId = _jwtService.GetUserIdFromToken();
+			if (userId == null)
+			{
+				throw new UnauthorizedAccessException("User ID not found in token.");
 			}
 
 			await _unitOfWorkCreateOrder.BeginTransactionAsync();
@@ -50,7 +58,7 @@ namespace IntermediaryTransactionsApp.Service
 				decimal sellerReceivedOnSuccess = request.IsSellerChargeFee ? request.MoneyValue : request.MoneyValue - feeOnSuccess;
 
 				var order = _mapper.Map<Order>(request);
-				order.CreatedBy = 1;
+				order.CreatedBy = (int)userId;
 				order.StatusId = 1;
 				order.IsPaidToSeller = true;
 				order.ShareLink = Guid.NewGuid().ToString();
@@ -64,7 +72,7 @@ namespace IntermediaryTransactionsApp.Service
 
 				UpdateMoneyRequest updateMoney = new UpdateMoneyRequest
 				{
-					UserId = 1,
+					UserId = (int)userId,
 					Money = Constants.Constants.FeeAddNewOrder
 				};
 
@@ -74,7 +82,7 @@ namespace IntermediaryTransactionsApp.Service
 				{
 					Subject = $"Hệ thống đã ghi nhận yêu trung gian mã số: {order.Id}",
 					Content = $"Hệ thống đã ghi nhận yêu cầu trung gian mã số: {order.Id}!\r\nVui lòng nhấn \"CHI TIẾT\" để xem chi tiết yêu cầu trung gian",
-					UserId = 1,
+					UserId = (int)userId,
 
 				};
 
@@ -86,7 +94,7 @@ namespace IntermediaryTransactionsApp.Service
 					TransactionType = 2,
 					Note = $"Thu phí tạo yêu cầu trung gian mã số: {order.Id}",
 					Payload = "Giao dịch thành công",
-					UserId = 1,
+					UserId = (int)userId,
 					OnDoneLink = "Example@gmail.com"
 				};
 

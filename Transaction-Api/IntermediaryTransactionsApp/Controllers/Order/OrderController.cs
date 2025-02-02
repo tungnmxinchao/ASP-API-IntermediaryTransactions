@@ -2,6 +2,7 @@
 using IntermediaryTransactionsApp.Dtos.OrderDto;
 using IntermediaryTransactionsApp.Interface.IOrderService;
 using IntermediaryTransactionsApp.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace IntermediaryTransactionsApp.Controllers.Order
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize(Policy = "CustomerPolicy")]
 	public class OrderController : ControllerBase
 	{
 		private readonly IOrderService _orderService;

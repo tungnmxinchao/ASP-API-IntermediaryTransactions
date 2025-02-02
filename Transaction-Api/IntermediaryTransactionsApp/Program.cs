@@ -40,6 +40,7 @@ builder.Services.AddTransient<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IUnitOfWorkCreateOrder, UnitOfWorkCreateOrder>();
 
 // Config jwt
+builder.Services.AddHttpContextAccessor();
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(options =>
 {
@@ -67,6 +68,9 @@ builder.Services.AddAuthorization(options =>
 	options.AddPolicy("AdminPolicy", policy =>
 		policy.RequireRole("Admin"));
 
+	options.AddPolicy("CustomerPolicy", policy =>
+		policy.RequireRole("Customer"));
+
 	options.AddPolicy("SameUserPolicy", policy =>
 		policy.Requirements.Add(new SameUserRequirement()));
 });
@@ -84,6 +88,7 @@ builder.Services.AddDatabaseService(builder.Configuration.GetConnectionString("D
 
 var app = builder.Build();
 
+// config hanlder exception
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
