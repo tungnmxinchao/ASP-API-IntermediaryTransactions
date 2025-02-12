@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+using IntermediaryTransactionsApp.Dtos.ApiDTO;
 
 namespace IntermediaryTransactionsApp.Exceptions
 {
@@ -36,12 +37,9 @@ namespace IntermediaryTransactionsApp.Exceptions
 				_ => (int)HttpStatusCode.InternalServerError
 			};
 
-			var response = new
-			{
-				Code = statusCode,
-				Message = exception.Message,
-				Details = statusCode == (int)HttpStatusCode.InternalServerError ? exception.StackTrace : null
-			};
+
+
+			var response = new ApiResponse<string>(statusCode, exception.Message);
 
 			context.Response.StatusCode = statusCode;
 
