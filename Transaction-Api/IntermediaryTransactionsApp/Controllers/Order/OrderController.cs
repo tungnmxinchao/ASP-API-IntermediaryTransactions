@@ -32,5 +32,16 @@ namespace IntermediaryTransactionsApp.Controllers.Order
 
 			return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to create order"));
 		}
+		[HttpPut]
+		public async Task<IActionResult> UpdateOrder([FromBody] UpdateOrderRequest request)
+		{
+			var order = await _orderService.UpdateOrder(request);
+			if (order != null)
+			{
+				return Ok(new ApiResponse<UpdateOrderResponse>(200, "Order updated successfully", order));
+			}
+			return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to create order"));
+
+		}
 	}
 }

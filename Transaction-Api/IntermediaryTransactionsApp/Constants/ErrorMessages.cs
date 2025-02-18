@@ -4,6 +4,7 @@
 	{
 		InvalidCredentials, 
 		ObjectNotFound,
+		ObjectNotFoundInToken
 
 	}
 
@@ -15,6 +16,7 @@
 			{
 				ErrorMessages.InvalidCredentials => "Invalid username or password.",
 				ErrorMessages.ObjectNotFound => "Object not found.",
+				ErrorMessages.ObjectNotFoundInToken => "Object not found in token",
 				_ => throw new NotImplementedException()
 			};
 		}

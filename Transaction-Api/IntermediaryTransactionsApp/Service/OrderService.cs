@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using IntermediaryTransactionsApp.Constants;
 using IntermediaryTransactionsApp.Db.Models;
 using IntermediaryTransactionsApp.Dtos.HistoryDto;
 using IntermediaryTransactionsApp.Dtos.MessageDto;
 using IntermediaryTransactionsApp.Dtos.OrderDto;
 using IntermediaryTransactionsApp.Dtos.UserDto;
+using IntermediaryTransactionsApp.Exceptions;
 using IntermediaryTransactionsApp.Interface.HistoryInterface;
 using IntermediaryTransactionsApp.Interface.IOrderService;
 using IntermediaryTransactionsApp.Interface.MessageInterface;
@@ -46,7 +48,7 @@ namespace IntermediaryTransactionsApp.Service
 			var userId = _jwtService.GetUserIdFromToken();
 			if (userId == null)
 			{
-				throw new UnauthorizedAccessException("User ID not found in token.");
+				throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
 			}
 
 			await _unitOfWorkCreateOrder.BeginTransactionAsync();
@@ -110,6 +112,42 @@ namespace IntermediaryTransactionsApp.Service
 				await _unitOfWorkCreateOrder.RollbackAsync();
 				throw;
 			}
+		}
+
+
+		public async Task<UpdateOrderResponse> UpdateOrder(UpdateOrderRequest request)
+		{
+
+			var order = _context.Orders.FirstOrDefault(x => x.Id == request.OrderId);
+
+			if(order == null)
+			{
+				throw new ObjectNotFoundException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFound));
+
+			}
+			decimal feeOnSuccess = request.MoneyValue * 0.05m;
+			decimal totalMoneyForBuyer = request.IsSellerChargeFee ? request.MoneyValue + feeOnSuccess : request.MoneyValue;
+			decimal sellerReceivedOnSuccess = request.IsSellerChargeFee ? request.MoneyValue : request.MoneyValue - feeOnSuccess;
+
+			order.Title = request.Title;
+			order.Description = request.Description;
+			order.IsPublic = request.IsPublic;
+			order.HiddenValue = request.HiddenValue;
+			order.MoneyValue = request.MoneyValue;
+			order.IsSellerChargeFee = request.IsSellerChargeFee;
+
+			order.UpdatedAt = DateTime.Now;
+			order.FeeOnSuccess = feeOnSuccess;
+			order.TotalMoneyForBuyer = totalMoneyForBuyer;
+			order.SellerReceivedOnSuccess = sellerReceivedOnSuccess;
+
+			_context.Update(order);
+			await _context.SaveChangesAsync();
+
+			var orderResponse = _mapper.Map<UpdateOrderResponse>(order);
+
+			return orderResponse;
+
 		}
 	}
 }

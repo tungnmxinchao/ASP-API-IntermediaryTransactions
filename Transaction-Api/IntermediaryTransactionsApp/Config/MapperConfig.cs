@@ -28,6 +28,12 @@ namespace IntermediaryTransactionsApp.Config
 
 			CreateMap<TransactionHistory, CreateHistoryRequest>().ReverseMap();
 
+			CreateMap<Order, UpdateOrderRequest>().ReverseMap();
+
+			CreateMap<Order, UpdateOrderResponse>().ReverseMap();
+
+
+
 		}
 	}
 }
