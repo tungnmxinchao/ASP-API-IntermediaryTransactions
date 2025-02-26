@@ -4,7 +4,8 @@
 	{
 		InvalidCredentials, 
 		ObjectNotFound,
-		ObjectNotFoundInToken
+		ObjectNotFoundInToken,
+		NotHavePermisson
 
 	}
 
@@ -17,6 +18,7 @@
 				ErrorMessages.InvalidCredentials => "Invalid username or password.",
 				ErrorMessages.ObjectNotFound => "Object not found.",
 				ErrorMessages.ObjectNotFoundInToken => "Object not found in token",
+				ErrorMessages.NotHavePermisson => "You do not have permission",
 				_ => throw new NotImplementedException()
 			};
 		}

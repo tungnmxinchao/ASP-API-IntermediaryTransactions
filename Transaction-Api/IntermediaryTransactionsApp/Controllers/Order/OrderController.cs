@@ -27,8 +27,8 @@ namespace IntermediaryTransactionsApp.Controllers.Order
 			bool result = await _orderService.CreateOrder(request);
 			if (result)
 			{
-				return Ok(new ApiResponse<string>(200, "Order created successfully"));
-			}
+                return Created($"/orders/", new ApiResponse<string>(201, "Order created successfully"));
+            }
 
 			return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to create order"));
 		}

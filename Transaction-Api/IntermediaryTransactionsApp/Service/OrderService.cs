@@ -139,14 +139,25 @@ namespace IntermediaryTransactionsApp.Service
 
 		public async Task<UpdateOrderResponse> UpdateOrder(UpdateOrderRequest request)
 		{
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
 
-			var order = _context.Orders.FirstOrDefault(x => x.Id == request.OrderId);
+            var order = _context.Orders.FirstOrDefault(x => x.Id == request.OrderId);
 
 			if(order == null)
 			{
 				throw new ObjectNotFoundException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFound));
 
 			}
+
+			if(order.CreatedBy != userId || order.Updateable == false)
+			{
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
+            }
+
 			UpdateOrderEntity(order, request);
 
 			_context.Update(order);
