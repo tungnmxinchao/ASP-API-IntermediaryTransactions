@@ -39,6 +39,17 @@ builder.Services.AddTransient<IMessageService, MessageService>();
 builder.Services.AddTransient<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IUnitOfWorkPersistDb, UnitOfWorkPersistDb>();
 
+// Register Fee Calculation Services
+builder.Services.AddScoped<IFeeCalculationStrategyFactory, FeeCalculationStrategyFactory>();
+builder.Services.AddScoped<IFeeCalculationStrategy>(sp => 
+	sp.GetRequiredService<IFeeCalculationStrategyFactory>().CreateStrategy(FeeStrategyType.Percentage));
+builder.Services.AddScoped<IFeeCalculationService, FeeCalculationService>();
+
+// Register Event Handlers
+builder.Services.AddScoped<IOrderEventHandler<OrderCreatedEvent>, OrderCreatedEventHandler>();
+builder.Services.AddScoped<IOrderEventHandler<OrderBoughtEvent>, OrderBoughtEventHandler>();
+builder.Services.AddScoped<IOrderEventDispatcher, OrderEventDispatcher>();
+
 // Config jwt
 builder.Services.AddHttpContextAccessor();
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("JwtSettings"));
