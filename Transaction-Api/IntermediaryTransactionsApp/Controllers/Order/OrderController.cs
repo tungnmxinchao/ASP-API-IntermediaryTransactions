@@ -43,5 +43,17 @@ namespace IntermediaryTransactionsApp.Controllers.Order
 			return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to create order"));
 
 		}
+
+		[HttpPut("buy-order")]
+		public async Task<IActionResult> BuyOrder([FromBody] BuyOrderRequest request)
+		{
+			var buyOrder = await _orderService.BuyOrder(request);
+
+			if (buyOrder)
+			{
+                return Ok(new ApiResponse<UpdateOrderResponse>(200, "Buy order successfully"));
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to buy order"));
+        }
 	}
 }

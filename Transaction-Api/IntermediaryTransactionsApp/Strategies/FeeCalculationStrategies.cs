@@ -17,13 +17,13 @@ namespace IntermediaryTransactionsApp.Strategies
         public decimal CalculateTotalForBuyer(decimal amount, bool isSellerChargeFee)
         {
             var fee = CalculateFee(amount);
-            return isSellerChargeFee ? amount + fee : amount;
+            return isSellerChargeFee ? amount  : amount + fee;
         }
 
         public decimal CalculateSellerReceived(decimal amount, bool isSellerChargeFee)
         {
             var fee = CalculateFee(amount);
-            return isSellerChargeFee ? amount : amount - fee;
+            return isSellerChargeFee ? amount - fee : amount;
         }
     }
 
