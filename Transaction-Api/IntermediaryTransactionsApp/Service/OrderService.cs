@@ -22,19 +22,19 @@ namespace IntermediaryTransactionsApp.Service
 		private readonly IMessageService _messageService;
 		private readonly IMapper _mapper;
 		private readonly IHistoryService _historyService;
-		private readonly IUnitOfWorkCreateOrder _unitOfWorkCreateOrder;
+		private readonly IUnitOfWorkPersistDb _unitOfWorkDb;
 		private readonly JwtService _jwtService;
 
 		public OrderService(ApplicationDbContext context, IUserService userService, 
 			IMessageService messageService, IMapper mapper, IHistoryService historyService,
-			IUnitOfWorkCreateOrder unitOfWorkCreateOrder, JwtService jwtService)
+			IUnitOfWorkPersistDb unitOfWorkCreateOrder, JwtService jwtService)
 		{
 			_context = context;
 			_userService = userService;
 			_messageService = messageService;
 			_mapper = mapper;
 			_historyService = historyService;
-			_unitOfWorkCreateOrder = unitOfWorkCreateOrder;
+			_unitOfWorkDb = unitOfWorkCreateOrder;
 			_jwtService = jwtService;
 		}
 
@@ -51,7 +51,7 @@ namespace IntermediaryTransactionsApp.Service
 				throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
 			}
 
-			await _unitOfWorkCreateOrder.BeginTransactionAsync();
+			await _unitOfWorkDb.BeginTransactionAsync();
 
 			try
 			{
@@ -59,21 +59,21 @@ namespace IntermediaryTransactionsApp.Service
 
 				await _context.Orders.AddAsync(order);
 
-				await UpdateUserBalance((int)userId);
+				await UpdateUserBalance((int)userId, Constants.Constants.FeeAddNewOrder);
 
 				await NotifyUser((int)userId, order.Id);
 
 				await RecordHistory((int)userId, order.Id);
 
-				await _unitOfWorkCreateOrder.SaveChangesAsync();
+				await _unitOfWorkDb.SaveChangesAsync();
 
-				await _unitOfWorkCreateOrder.CommitAsync();
+				await _unitOfWorkDb.CommitAsync();
 
 				return true;
 			}
 			catch (Exception)
 			{
-				await _unitOfWorkCreateOrder.RollbackAsync();
+				await _unitOfWorkDb.RollbackAsync();
 				throw;
 			}
 		}
@@ -110,12 +110,12 @@ namespace IntermediaryTransactionsApp.Service
 			await _messageService.CreateMessage(messageRequest);
 		}
 
-		private async Task UpdateUserBalance(int userId)
+		private async Task UpdateUserBalance(int userId, decimal money)
 		{
 			var updateMoney = new UpdateMoneyRequest
 			{
 				UserId = userId,
-				Money = Constants.Constants.FeeAddNewOrder
+				Money = money
 			};
 
 			await _userService.UpdateMoney(updateMoney);
@@ -190,5 +190,109 @@ namespace IntermediaryTransactionsApp.Service
 			order.TotalMoneyForBuyer = totalMoneyForBuyer;
 			order.SellerReceivedOnSuccess = sellerReceivedOnSuccess;
 		}
+
+        private async Task NotifyBuyer(int userId, Guid orderId)
+        {
+            var messageRequest = new CreateMessageRequest
+            {
+                Subject = $"Hoàn thành xử lý thanh toán giao dịch mã số: {orderId}",
+                Content = $"Trạng thái giao dịch: Thành công\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                UserId = userId
+            };
+
+            await _messageService.CreateMessage(messageRequest);
+        }
+
+        private async Task RecordHistoryBuyAction(int userId, Guid orderId)
+        {
+            var historyRequest = new CreateHistoryRequest
+            {
+                Amount = Constants.Constants.FeeAddNewOrder,
+                TransactionType = 2,
+                Note = $"Thu phí thực hiện cầu trung gian mã số: {orderId}",
+                Payload = "Giao dịch thành công",
+                UserId = userId,
+                OnDoneLink = "Example@gmail.com"
+            };
+
+            await _historyService.CreateHistory(historyRequest);
+        }
+
+		public void UpdateOrderAfterBuy(Order order, int status, int buyerId)
+		{
+			order.Customer = buyerId;
+            order.StatusId = status;
+			order.Updateable = false;
+
+        }
+
+
+        public  async Task<bool> BuyOrder(BuyOrderRequest request)
+		{
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            var order = _context.Orders.FirstOrDefault(x => x.Id == request.OrderId);
+
+            if (order == null)
+            {
+                throw new ObjectNotFoundException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFound));
+
+            }
+
+			if (order.CreatedBy == userId)
+			{
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
+            }
+
+			var user = _context.Users.Find(userId);
+
+			if (user == null)
+			{
+                throw new ObjectNotFoundException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFound));
+
+            }
+
+			if(user.Money < order.TotalMoneyForBuyer)
+			{
+				throw new Exception(ErrorMessageExtensions.GetMessage(ErrorMessages.BalanceNotEnough));
+			}
+
+            await _unitOfWorkDb.BeginTransactionAsync();
+
+			try
+			{
+                await UpdateUserBalance((int)userId, order.TotalMoneyForBuyer);
+
+                await UpdateUserBalance(order.CreatedBy, order.SellerReceivedOnSuccess);
+
+				UpdateOrderAfterBuy(order, 3, (int)userId);
+
+                await NotifyBuyer((int)userId, order.Id);
+
+                await RecordHistory((int)userId, order.Id);
+
+                await _unitOfWorkDb.SaveChangesAsync();
+
+                await _unitOfWorkDb.CommitAsync();
+
+				return true;
+				
+            }
+            catch (Exception)
+            {
+                await _unitOfWorkDb.RollbackAsync();
+                throw;
+            }
+
+        }
+
+	
+
+		
+
 	}
 }

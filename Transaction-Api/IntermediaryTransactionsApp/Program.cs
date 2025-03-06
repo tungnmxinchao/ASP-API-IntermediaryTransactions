@@ -37,7 +37,7 @@ builder.Services.AddSingleton<IAuthorizationHandler, SameUserAuthorizationHandle
 builder.Services.AddTransient<IOrderService, OrderService>();
 builder.Services.AddTransient<IMessageService, MessageService>();
 builder.Services.AddTransient<IHistoryService, HistoryService>();
-builder.Services.AddScoped<IUnitOfWorkCreateOrder, UnitOfWorkCreateOrder>();
+builder.Services.AddScoped<IUnitOfWorkPersistDb, UnitOfWorkPersistDb>();
 
 // Config jwt
 builder.Services.AddHttpContextAccessor();

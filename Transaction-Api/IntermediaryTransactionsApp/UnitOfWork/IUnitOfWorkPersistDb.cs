@@ -1,6 +1,6 @@
 ﻿namespace IntermediaryTransactionsApp.UnitOfWork
 {
-	public interface IUnitOfWorkCreateOrder
+	public interface IUnitOfWorkPersistDb
 	{
 		Task BeginTransactionAsync();
 		Task CommitAsync();

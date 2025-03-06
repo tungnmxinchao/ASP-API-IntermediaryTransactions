@@ -5,7 +5,8 @@
 		InvalidCredentials, 
 		ObjectNotFound,
 		ObjectNotFoundInToken,
-		NotHavePermisson
+		NotHavePermisson,
+		BalanceNotEnough
 
 	}
 
@@ -19,7 +20,8 @@
 				ErrorMessages.ObjectNotFound => "Object not found.",
 				ErrorMessages.ObjectNotFoundInToken => "Object not found in token",
 				ErrorMessages.NotHavePermisson => "You do not have permission",
-				_ => throw new NotImplementedException()
+                ErrorMessages.BalanceNotEnough => "You do not have enough money",
+                _ => throw new NotImplementedException()
 			};
 		}
 	}

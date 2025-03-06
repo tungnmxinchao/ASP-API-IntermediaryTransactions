@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace IntermediaryTransactionsApp.UnitOfWork
 {
-	public class UnitOfWorkCreateOrder : IUnitOfWorkCreateOrder
+	public class UnitOfWorkPersistDb : IUnitOfWorkPersistDb
 	{
 		private readonly ApplicationDbContext _context;
 		private IDbContextTransaction _transaction;
 
-		public UnitOfWorkCreateOrder(ApplicationDbContext context)
+		public UnitOfWorkPersistDb(ApplicationDbContext context)
 		{
 			_context = context;
 		}
