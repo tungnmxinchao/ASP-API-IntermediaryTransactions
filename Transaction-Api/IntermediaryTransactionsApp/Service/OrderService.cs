@@ -2,10 +2,7 @@
 using IntermediaryTransactionsApp.Commands;
 using IntermediaryTransactionsApp.Constants;
 using IntermediaryTransactionsApp.Db.Models;
-using IntermediaryTransactionsApp.Dtos.HistoryDto;
-using IntermediaryTransactionsApp.Dtos.MessageDto;
 using IntermediaryTransactionsApp.Dtos.OrderDto;
-using IntermediaryTransactionsApp.Dtos.UserDto;
 using IntermediaryTransactionsApp.Events;
 using IntermediaryTransactionsApp.Exceptions;
 using IntermediaryTransactionsApp.Interface.HistoryInterface;
@@ -13,7 +10,6 @@ using IntermediaryTransactionsApp.Interface.IOrderService;
 using IntermediaryTransactionsApp.Interface.MessageInterface;
 using IntermediaryTransactionsApp.Interface.UserInterface;
 using IntermediaryTransactionsApp.Specifications;
-using IntermediaryTransactionsApp.Strategies;
 using IntermediaryTransactionsApp.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,7 +71,6 @@ namespace IntermediaryTransactionsApp.Service
 
 			if (order != null)
 			{
-				await _eventDispatcher.DispatchAsync(new OrderCreatedEvent(order.Id, (int)userId));
 				return true;
 			}
 

@@ -181,7 +181,7 @@ namespace IntermediaryTransactionsApp.Commands
 
                 await NotifyBuyer();
 
-                await RecordHistory();
+                await RecordHistory(_order);
 
                 await _unitOfWorkDb.SaveChangesAsync();
 
@@ -237,13 +237,13 @@ namespace IntermediaryTransactionsApp.Commands
             await _messageService.CreateMessage(messageRequest);
         }
 
-        private async Task RecordHistory()
+        private async Task RecordHistory(Order order)
         {
             var historyRequest = new CreateHistoryRequest
             {
-                Amount = Constants.Constants.FeeAddNewOrder,
+                Amount = order.TotalMoneyForBuyer,
                 TransactionType = 2,
-                Note = $"Thu phí thực hiện cầu trung gian mã số: {_order.Id}",
+                Note = $"Thu phí thực hiện mua đơn hàng mã số: {_order.Id}",
                 Payload = "Giao dịch thành công",
                 UserId = _userId,
                 OnDoneLink = "Example@gmail.com"

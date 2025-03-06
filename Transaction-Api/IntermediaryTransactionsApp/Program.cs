@@ -48,7 +48,6 @@ builder.Services.AddScoped<IFeeCalculationStrategy>(sp =>
 builder.Services.AddScoped<IFeeCalculationService, FeeCalculationService>();
 
 // Register Event Handlers
-builder.Services.AddScoped<IOrderEventHandler<OrderCreatedEvent>, OrderCreatedEventHandler>();
 builder.Services.AddScoped<IOrderEventHandler<OrderBoughtEvent>, OrderBoughtEventHandler>();
 builder.Services.AddScoped<IOrderEventDispatcher, OrderEventDispatcher>();
 
