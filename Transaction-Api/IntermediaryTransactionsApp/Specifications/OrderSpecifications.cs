@@ -4,45 +4,45 @@ namespace IntermediaryTransactionsApp.Specifications
 {
     public class OrderByIdSpecification : BaseSpecification<Order>
     {
-        public OrderByIdSpecification(Guid orderId)
+        public OrderByIdSpecification(Guid orderId) 
+            : base(order => order.Id == orderId)
         {
-            Criteria = order => order.Id == orderId;
         }
     }
 
     public class OrderByUserIdSpecification : BaseSpecification<Order>
     {
-        public OrderByUserIdSpecification(int userId)
+        public OrderByUserIdSpecification(int userId) 
+            : base(order => order.CreatedBy == userId)
         {
-            Criteria = order => order.CreatedBy == userId;
         }
     }
 
     public class OrderByStatusSpecification : BaseSpecification<Order>
     {
-        public OrderByStatusSpecification(int statusId)
+        public OrderByStatusSpecification(int statusId) 
+            : base(order => order.StatusId == statusId)
         {
-            Criteria = order => order.StatusId == statusId;
         }
     }
 
     public class OrderUpdateableSpecification : BaseSpecification<Order>
     {
-        public OrderUpdateableSpecification(Guid orderId, int userId)
+        public OrderUpdateableSpecification(Guid orderId, int userId) 
+            : base(order => order.Id == orderId && 
+                          order.CreatedBy == userId && 
+                          order.Updateable == true)
         {
-            Criteria = order => order.Id == orderId && 
-                               order.CreatedBy == userId && 
-                               order.Updateable == true;
         }
     }
 
     public class OrderBuyableSpecification : BaseSpecification<Order>
     {
-        public OrderBuyableSpecification(Guid orderId, int userId)
+        public OrderBuyableSpecification(Guid orderId, int userId) 
+            : base(order => order.Id == orderId && 
+                          order.CreatedBy != userId && 
+                          order.StatusId == 1)
         {
-            Criteria = order => order.Id == orderId && 
-                               order.CreatedBy != userId && 
-                               order.StatusId == 1;
         }
     }
 } 
