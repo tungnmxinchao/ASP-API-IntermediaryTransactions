@@ -87,7 +87,7 @@ namespace IntermediaryTransactionsApp.Service
 		{
             var user =  _context.Users.Find(userId);
 
-			if(user != null && user.Money > money)
+			if(user != null && user.Money < money)
 			{
 				return true;
 			}

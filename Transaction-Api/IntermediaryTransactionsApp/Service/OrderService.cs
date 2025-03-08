@@ -274,9 +274,14 @@ namespace IntermediaryTransactionsApp.Service
         public async Task<bool> CallAdmin(Guid orderId)
         {
             var userId = _jwtService.GetUserIdFromToken();
-            if (userId == null || _userService.CheckBalanceUserWithMoney(Constants.Constants.FeeCallAdmin, (int) userId))
+            if (userId == null )
             {
                 throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+			if (_userService.CheckBalanceUserWithMoney(Constants.Constants.FeeCallAdmin, (int)userId))
+			{
+                throw new ValidationException(ErrorMessageExtensions.GetMessage(ErrorMessages.BalanceNotEnough));
             }
 
             var specification = new CallAdminHandleOrder(orderId);
@@ -287,8 +292,6 @@ namespace IntermediaryTransactionsApp.Service
                 throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
             }
 
-
-            await _unitOfWorkDb.BeginTransactionAsync();
 
             var command = new CallAdminCommand(
                 order,

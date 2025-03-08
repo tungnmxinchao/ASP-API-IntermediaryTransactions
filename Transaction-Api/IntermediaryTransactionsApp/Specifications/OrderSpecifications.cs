@@ -51,7 +51,7 @@ namespace IntermediaryTransactionsApp.Specifications
         public OrderCompletableSpecification(Guid orderId, int userId)
             : base(order => order.Id == orderId &&
                           order.Customer == userId &&
-                          order.StatusId == 3)
+                          (order.StatusId == 3 || order.StatusId == 8))
         {
         }
     }
