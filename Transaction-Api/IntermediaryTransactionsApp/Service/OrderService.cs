@@ -346,11 +346,43 @@ namespace IntermediaryTransactionsApp.Service
 
         }
 
-
-
         private IQueryable<Order> ApplySpecification(ISpecification<Order> spec)
 		{
 			return SpecificationEvaluator<Order>.GetQuery(_context.Orders.AsQueryable(), spec);
 		}
+
+        public async Task<OrderDetailResponse> GetOrderDetail(Guid orderId)
+        {
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            var specification = new OrderViewDetailSpecification(orderId, (int)userId);
+            var order = await ApplySpecification(specification).FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                throw new ObjectNotFoundException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFound));
+            }
+
+            var seller = await _context.Users.FirstOrDefaultAsync(u => u.Id == order.CreatedBy);
+            if (seller == null)
+            {
+                throw new ObjectNotFoundException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFound));
+            }
+
+            var response = _mapper.Map<OrderDetailResponse>(order);
+
+            // Ẩn nội dung ẩn nếu:
+            // - Order chưa được mua (Updateable = true) và người xem không phải người tạo
+            if (order.Updateable && order.CreatedBy != userId)
+            {
+                response.HiddenValue = null;
+            }
+
+            return response;
+        }
 	}
 }

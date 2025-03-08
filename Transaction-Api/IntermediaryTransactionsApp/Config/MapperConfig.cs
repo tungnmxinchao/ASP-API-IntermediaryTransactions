@@ -32,8 +32,13 @@ namespace IntermediaryTransactionsApp.Config
 
 			CreateMap<Order, UpdateOrderResponse>().ReverseMap();
 
+            CreateMap<Users, UserBasicInfoDto>().ReverseMap();
 
+            CreateMap<Order, OrderDetailResponse>()
+               .ForMember(dest => dest.Customer, opt => opt.MapFrom(src => src.CustomerUser))
+               .ForMember(dest => dest.CreatedByUser, opt => opt.MapFrom(src => src.CreatedByUser));
+           
 
-		}
+        }
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using IntermediaryTransactionsApp.Dtos.ApiDTO;
 using IntermediaryTransactionsApp.Dtos.OrderDto;
+using IntermediaryTransactionsApp.Exceptions;
 using IntermediaryTransactionsApp.Interface.IOrderService;
 using IntermediaryTransactionsApp.Service;
 using Microsoft.AspNetCore.Authorization;
@@ -109,6 +110,18 @@ namespace IntermediaryTransactionsApp.Controllers.Order
                 return Ok(new ApiResponse<UpdateOrderResponse>(200, "Cancel order successfully"));
             }
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to cancel order"));
+        }
+
+        [HttpGet("{orderId}")]
+        public async Task<IActionResult> GetOrderDetail(Guid orderId)
+        {
+            var result = await _orderService.GetOrderDetail(orderId);
+
+            if (result != null)
+            {
+                return Ok(new ApiResponse<OrderDetailResponse>(200, "Get order details successfully", result));
+            }
+            return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>(404, "Not found order"));
         }
     }
 }

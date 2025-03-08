@@ -19,5 +19,7 @@ namespace IntermediaryTransactionsApp.Interface.IOrderService
         public Task<bool> CallAdmin(Guid orderId);
 
         public Task<bool> CancelOrder(Guid orderId);
+
+        public Task<OrderDetailResponse> GetOrderDetail(Guid orderId);
     }
 }
