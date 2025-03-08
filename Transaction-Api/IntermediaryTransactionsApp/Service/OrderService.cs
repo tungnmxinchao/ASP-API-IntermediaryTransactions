@@ -10,6 +10,7 @@ using IntermediaryTransactionsApp.Interface.IOrderService;
 using IntermediaryTransactionsApp.Interface.MessageInterface;
 using IntermediaryTransactionsApp.Interface.UserInterface;
 using IntermediaryTransactionsApp.Specifications;
+using IntermediaryTransactionsApp.State;
 using IntermediaryTransactionsApp.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 
@@ -169,7 +170,209 @@ namespace IntermediaryTransactionsApp.Service
 			return result;
 		}
 
-		private IQueryable<Order> ApplySpecification(ISpecification<Order> spec)
+        public async Task<bool> CompleteOrder(Guid orderId)
+        {
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            var specification = new OrderCompletableSpecification(orderId, (int)userId);
+            var order = await ApplySpecification(specification).FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
+            }
+          
+
+            await _unitOfWorkDb.BeginTransactionAsync();
+
+            try
+            {
+                var orderContext = new OrderContext(order);
+
+                await orderContext.CompleteOrder(); 
+                _context.Update(order); 
+
+                await _unitOfWorkDb.SaveChangesAsync(); 
+                await _unitOfWorkDb.CommitAsync();
+
+            
+                return true;
+            }
+            catch (Exception)
+            {
+                await _unitOfWorkDb.RollbackAsync();
+                throw;
+            }
+            
+        }       
+
+        public async Task<bool> ComplainOrder(Guid orderId)
+        {
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            var specification = new OrderComplaintSpecification(orderId, (int)userId);
+            var order = await ApplySpecification(specification).FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
+            }
+
+
+            await _unitOfWorkDb.BeginTransactionAsync();
+
+            try
+            {
+                var orderContext = new OrderContext(order);
+
+                await orderContext.Complain();
+                _context.Update(order);
+
+                await _unitOfWorkDb.SaveChangesAsync();
+                await _unitOfWorkDb.CommitAsync();
+
+
+                return true;
+            }
+            catch (Exception)
+            {
+                await _unitOfWorkDb.RollbackAsync();
+                throw;
+            }
+
+        }
+
+        public async Task<bool> RequestBuyerCheckOrder(Guid orderId)
+        {
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            var specification = new RequestBuyerCheckOrder(orderId, (int)userId);
+            var order = await ApplySpecification(specification).FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
+            }
+
+
+            await _unitOfWorkDb.BeginTransactionAsync();
+
+            try
+            {
+                var orderContext = new OrderContext(order);
+
+                await orderContext.RequestBuyerCheckOrder();
+                _context.Update(order);
+
+                await _unitOfWorkDb.SaveChangesAsync();
+                await _unitOfWorkDb.CommitAsync();
+
+
+                return true;
+            }
+            catch (Exception)
+            {
+                await _unitOfWorkDb.RollbackAsync();
+                throw;
+            }
+
+        }
+
+        public async Task<bool> CallAdmin(Guid orderId)
+        {
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            var specification = new CallAdminHandleOrder(orderId);
+            var order = await ApplySpecification(specification).FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
+            }
+
+
+            await _unitOfWorkDb.BeginTransactionAsync();
+
+            try
+            {
+                var orderContext = new OrderContext(order);
+
+                await orderContext.CallAdmin();
+                _context.Update(order);
+
+                await _unitOfWorkDb.SaveChangesAsync();
+                await _unitOfWorkDb.CommitAsync();
+
+
+                return true;
+            }
+            catch (Exception)
+            {
+                await _unitOfWorkDb.RollbackAsync();
+                throw;
+            }
+
+        }
+
+        public async Task<bool> CancelOrder(Guid orderId)
+        {
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            var specification = new CancelOrder(orderId, (int) userId);
+            var order = await ApplySpecification(specification).FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
+            }
+
+
+            await _unitOfWorkDb.BeginTransactionAsync();
+
+            try
+            {
+                var orderContext = new OrderContext(order);
+
+                await orderContext.CancelOrder();
+                _context.Update(order);
+
+                await _unitOfWorkDb.SaveChangesAsync();
+                await _unitOfWorkDb.CommitAsync();
+
+
+                return true;
+            }
+            catch (Exception)
+            {
+                await _unitOfWorkDb.RollbackAsync();
+                throw;
+            }
+
+        }
+
+
+
+        private IQueryable<Order> ApplySpecification(ISpecification<Order> spec)
 		{
 			return SpecificationEvaluator<Order>.GetQuery(_context.Orders.AsQueryable(), spec);
 		}

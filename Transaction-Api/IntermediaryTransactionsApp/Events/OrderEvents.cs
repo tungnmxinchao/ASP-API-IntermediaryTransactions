@@ -51,7 +51,7 @@ namespace IntermediaryTransactionsApp.Events
                 try
                 {
                     _logger.LogInformation($"Starting 2-minute delay for OrderId: {@event.OrderId}");
-                    await Task.Delay(TimeSpan.FromMinutes(1));
+                    await Task.Delay(TimeSpan.FromMinutes(1000));
                     _logger.LogInformation($"Delay completed for OrderId: {@event.OrderId}, checking order status");
                     
                     using (var scope = _scopeFactory.CreateScope())

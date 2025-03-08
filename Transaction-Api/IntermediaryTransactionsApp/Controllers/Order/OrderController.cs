@@ -55,5 +55,60 @@ namespace IntermediaryTransactionsApp.Controllers.Order
             }
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to buy order"));
         }
-	}
+
+        [HttpPut("{orderId}/complete")]
+        public async Task<IActionResult> CompleteOrder(Guid orderId)
+        {
+            var result = await _orderService.CompleteOrder(orderId);
+            if (result)
+            {
+                return Ok(new ApiResponse<UpdateOrderResponse>(200, "Complete order successfully"));
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to complete order"));
+        }
+
+        [HttpPut("{orderId}/complain")]
+        public async Task<IActionResult> ComplainOrder(Guid orderId)
+        {
+            var result = await _orderService.ComplainOrder(orderId);
+            if (result)
+            {
+                return Ok(new ApiResponse<UpdateOrderResponse>(200, "Complain order successfully"));
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to complain order"));
+        }
+
+        [HttpPut("{orderId}/requestBuyer-CheckOrder")]
+        public async Task<IActionResult> RequestBuyerCheckOrder(Guid orderId)
+        {
+            var result = await _orderService.RequestBuyerCheckOrder(orderId);
+            if (result)
+            {
+                return Ok(new ApiResponse<UpdateOrderResponse>(200, "Request buyer check order again successfully"));
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to request buyer check order again"));
+        }
+
+        [HttpPut("{orderId}/call-admin")]
+        public async Task<IActionResult> CallAdmin(Guid orderId)
+        {
+            var result = await _orderService.CallAdmin(orderId);
+            if (result)
+            {
+                return Ok(new ApiResponse<UpdateOrderResponse>(200, "Call admin handler order successfully"));
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to call admin handler order"));
+        }
+
+        [HttpPut("{orderId}/cancel-order")]
+        public async Task<IActionResult> CancelOrder(Guid orderId)
+        {
+            var result = await _orderService.CancelOrder(orderId);
+            if (result)
+            {
+                return Ok(new ApiResponse<UpdateOrderResponse>(200, "Cancel order successfully"));
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to cancel order"));
+        }
+    }
 }

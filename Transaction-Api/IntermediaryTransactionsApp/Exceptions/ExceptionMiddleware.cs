@@ -34,7 +34,8 @@ namespace IntermediaryTransactionsApp.Exceptions
 				ObjectNotFoundException => (int)HttpStatusCode.NotFound,
 				ValidationException => (int)HttpStatusCode.BadRequest,
 				UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
-				_ => (int)HttpStatusCode.InternalServerError
+                InvalidOperationException => (int)HttpStatusCode.InternalServerError,
+                _ => (int)HttpStatusCode.InternalServerError
 			};
 
 

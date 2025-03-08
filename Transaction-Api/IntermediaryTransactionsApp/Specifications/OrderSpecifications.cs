@@ -45,4 +45,52 @@ namespace IntermediaryTransactionsApp.Specifications
         {
         }
     }
+
+    public class OrderCompletableSpecification : BaseSpecification<Order>
+    {
+        public OrderCompletableSpecification(Guid orderId, int userId)
+            : base(order => order.Id == orderId &&
+                          order.Customer == userId &&
+                          order.StatusId == 3)
+        {
+        }
+    }
+
+    public class OrderComplaintSpecification : BaseSpecification<Order>
+    {
+        public OrderComplaintSpecification(Guid orderId, int userId)
+            : base(order => order.Id == orderId &&
+                          order.Customer == userId &&
+                          order.StatusId == 3)
+        {
+        }
+    }
+
+    public class RequestBuyerCheckOrder : BaseSpecification<Order>
+    {
+        public RequestBuyerCheckOrder(Guid orderId, int userId)
+            : base(order => order.Id == orderId &&
+                          order.CreatedBy == userId &&
+                          order.StatusId == 5)
+        {
+        }
+    }
+
+    public class CallAdminHandleOrder : BaseSpecification<Order>
+    {
+        public CallAdminHandleOrder(Guid orderId)
+            : base(order => order.Id == orderId &&
+                          (order.StatusId == 5 || order.StatusId == 8 ))
+        {
+        }
+    }
+
+    public class CancelOrder : BaseSpecification<Order>
+    {
+        public CancelOrder(Guid orderId, int userId)
+            : base(order => order.Id == orderId && (order.CreatedBy == userId) &&
+                          (order.StatusId == 5 || order.StatusId == 7))
+        {
+        }
+    }
 } 
