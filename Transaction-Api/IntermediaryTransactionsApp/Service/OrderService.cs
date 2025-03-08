@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using IntermediaryTransactionsApp.Commands;
 using IntermediaryTransactionsApp.Constants;
 using IntermediaryTransactionsApp.Db.Models;
@@ -11,7 +10,6 @@ using IntermediaryTransactionsApp.Interface.IOrderService;
 using IntermediaryTransactionsApp.Interface.MessageInterface;
 using IntermediaryTransactionsApp.Interface.UserInterface;
 using IntermediaryTransactionsApp.Specifications;
-using IntermediaryTransactionsApp.State;
 using IntermediaryTransactionsApp.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 
