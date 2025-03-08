@@ -52,25 +52,46 @@ namespace IntermediaryTransactionsApp.Service
 			throw new ObjectNotFoundException($"User with ID {id} not found.");
 		}
 
-		public async Task<bool> UpdateMoney(UpdateMoneyRequest updateMoneyRequest)
+        public async Task<bool> UpdateMoney(UpdateMoneyRequest updateMoneyRequest)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == updateMoneyRequest.UserId);
+
+            if (user == null)
+            {
+                throw new ObjectNotFoundException($"User with ID {updateMoneyRequest.UserId} not found.");
+            }
+
+            switch (updateMoneyRequest.TypeUpdate)
+            {
+                case 1: 
+                    user.Money += updateMoneyRequest.Money;
+                    break;
+                case 2: 
+                    if (user.Money < updateMoneyRequest.Money)
+                    {
+                        throw new ValidationException("Your money not enough!");
+                    }
+                    user.Money -= updateMoneyRequest.Money;
+                    break;
+                default:
+                    throw new ArgumentException("Invalid update money type.");
+            }
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+		public bool CheckBalanceUserWithMoney(decimal money, int userId)
 		{
-			var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == updateMoneyRequest.UserId);
+            var user =  _context.Users.Find(userId);
 
-			if (user == null)
+			if(user != null && user.Money > money)
 			{
-				throw new ObjectNotFoundException($"User with ID {user.Id} not found.");
+				return true;
 			}
-
-			if (user.Money < updateMoneyRequest.Money)
-			{
-				throw new ValidationException("Your money not enough!");
-			}			
-
-			user.Money -= updateMoneyRequest.Money;
-
-			_context.Users.Update(user);
-
-			return true;
-		}
-	}
+			return false;
+        }
+    }
 }

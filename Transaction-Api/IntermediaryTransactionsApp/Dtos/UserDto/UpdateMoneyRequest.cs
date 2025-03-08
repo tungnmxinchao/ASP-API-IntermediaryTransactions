@@ -10,5 +10,8 @@ namespace IntermediaryTransactionsApp.Dtos.UserDto
 		[Range(0.01, double.MaxValue, ErrorMessage = "Money must be greater than 0.")]
 		public decimal Money {  get; set; }
 
+        [Required]
+        public int TypeUpdate {  get; set; }
+
 	}
 }

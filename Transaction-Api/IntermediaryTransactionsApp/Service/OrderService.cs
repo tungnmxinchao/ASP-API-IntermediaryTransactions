@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure.Core;
 using IntermediaryTransactionsApp.Commands;
 using IntermediaryTransactionsApp.Constants;
 using IntermediaryTransactionsApp.Db.Models;
@@ -185,29 +186,24 @@ namespace IntermediaryTransactionsApp.Service
             {
                 throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
             }
-          
 
-            await _unitOfWorkDb.BeginTransactionAsync();
+            var command = new CompleteOrderCommand(
+                _historyService,
+                _userService,
+                order,
+                _context,
+                _messageService,
+                _unitOfWorkDb);             
 
-            try
+            var result = await command.ExecuteAsync();
+
+            if(result)
             {
-                var orderContext = new OrderContext(order);
-
-                await orderContext.CompleteOrder(); 
-                _context.Update(order); 
-
-                await _unitOfWorkDb.SaveChangesAsync(); 
-                await _unitOfWorkDb.CommitAsync();
-
-            
                 return true;
             }
-            catch (Exception)
-            {
-                await _unitOfWorkDb.RollbackAsync();
-                throw;
-            }
-            
+
+            return false;
+
         }       
 
         public async Task<bool> ComplainOrder(Guid orderId)
@@ -227,26 +223,20 @@ namespace IntermediaryTransactionsApp.Service
             }
 
 
-            await _unitOfWorkDb.BeginTransactionAsync();
+            var command = new ComplainOrderCommand(
+                order,
+                _context,
+                _messageService,
+                _unitOfWorkDb);
 
-            try
+            var result = await command.ExecuteAsync();
+
+            if (result)
             {
-                var orderContext = new OrderContext(order);
-
-                await orderContext.Complain();
-                _context.Update(order);
-
-                await _unitOfWorkDb.SaveChangesAsync();
-                await _unitOfWorkDb.CommitAsync();
-
-
                 return true;
             }
-            catch (Exception)
-            {
-                await _unitOfWorkDb.RollbackAsync();
-                throw;
-            }
+
+            return false;
 
         }
 
@@ -266,34 +256,27 @@ namespace IntermediaryTransactionsApp.Service
                 throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
             }
 
+            var command = new RequestBuyerCheckOrderCommand(
+                order,
+                _context,
+                _messageService,
+                _unitOfWorkDb);
 
-            await _unitOfWorkDb.BeginTransactionAsync();
+            var result = await command.ExecuteAsync();
 
-            try
+            if (result)
             {
-                var orderContext = new OrderContext(order);
-
-                await orderContext.RequestBuyerCheckOrder();
-                _context.Update(order);
-
-                await _unitOfWorkDb.SaveChangesAsync();
-                await _unitOfWorkDb.CommitAsync();
-
-
                 return true;
             }
-            catch (Exception)
-            {
-                await _unitOfWorkDb.RollbackAsync();
-                throw;
-            }
+
+            return false;
 
         }
 
         public async Task<bool> CallAdmin(Guid orderId)
         {
             var userId = _jwtService.GetUserIdFromToken();
-            if (userId == null)
+            if (userId == null || _userService.CheckBalanceUserWithMoney(Constants.Constants.FeeCallAdmin, (int) userId))
             {
                 throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
             }
@@ -309,24 +292,20 @@ namespace IntermediaryTransactionsApp.Service
 
             await _unitOfWorkDb.BeginTransactionAsync();
 
-            try
+            var command = new CallAdminCommand(
+                order,
+                _context,
+                _messageService,
+                _unitOfWorkDb);
+
+            var result = await command.ExecuteAsync();
+
+            if (result)
             {
-                var orderContext = new OrderContext(order);
-
-                await orderContext.CallAdmin();
-                _context.Update(order);
-
-                await _unitOfWorkDb.SaveChangesAsync();
-                await _unitOfWorkDb.CommitAsync();
-
-
                 return true;
             }
-            catch (Exception)
-            {
-                await _unitOfWorkDb.RollbackAsync();
-                throw;
-            }
+
+            return false;
 
         }
 
@@ -347,26 +326,22 @@ namespace IntermediaryTransactionsApp.Service
             }
 
 
-            await _unitOfWorkDb.BeginTransactionAsync();
+            var command = new SellerCancelOrderCommand(
+				_historyService,
+				_userService,
+                order,
+                _context,
+                _messageService,
+                _unitOfWorkDb);
 
-            try
+            var result = await command.ExecuteAsync();
+
+            if (result)
             {
-                var orderContext = new OrderContext(order);
-
-                await orderContext.CancelOrder();
-                _context.Update(order);
-
-                await _unitOfWorkDb.SaveChangesAsync();
-                await _unitOfWorkDb.CommitAsync();
-
-
                 return true;
             }
-            catch (Exception)
-            {
-                await _unitOfWorkDb.RollbackAsync();
-                throw;
-            }
+
+            return false;
 
         }
 
