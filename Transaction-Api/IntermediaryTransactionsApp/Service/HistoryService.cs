@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using IntermediaryTransactionsApp.Constants;
 using IntermediaryTransactionsApp.Db.Models;
 using IntermediaryTransactionsApp.Dtos.HistoryDto;
 using IntermediaryTransactionsApp.Exceptions;
 using IntermediaryTransactionsApp.Interface.HistoryInterface;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntermediaryTransactionsApp.Service
 {
@@ -10,9 +12,11 @@ namespace IntermediaryTransactionsApp.Service
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly IMapper _mapper;
+        private readonly JwtService _jwtService;
 
-		public HistoryService( ApplicationDbContext context, IMapper mapper)
+        public HistoryService( ApplicationDbContext context, IMapper mapper, JwtService jwtService)
 		{
+			_jwtService = jwtService;
 			_context = context;
 			_mapper = mapper;
 		}
@@ -34,5 +38,19 @@ namespace IntermediaryTransactionsApp.Service
 			return true;
 
 		}
+
+		public async Task<List<TransactionHistory>> GetHistoryTransactions()
+		{
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            return await _context.TransactionHistories
+                .Where(i => i.UserId == userId)
+                .ToListAsync(); 
+
+        }
 	}
 }

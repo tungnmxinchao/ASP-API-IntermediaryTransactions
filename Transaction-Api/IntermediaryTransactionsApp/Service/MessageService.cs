@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using IntermediaryTransactionsApp.Constants;
 using IntermediaryTransactionsApp.Db.Models;
 using IntermediaryTransactionsApp.Dtos.MessageDto;
 using IntermediaryTransactionsApp.Exceptions;
 using IntermediaryTransactionsApp.Interface.MessageInterface;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntermediaryTransactionsApp.Service
 {
@@ -10,10 +12,13 @@ namespace IntermediaryTransactionsApp.Service
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly IMapper _mapper;
+		private readonly JwtService _jwtService;
 
-		public MessageService(IMapper mapper, ApplicationDbContext context)
+		public MessageService(IMapper mapper, ApplicationDbContext context, 
+			JwtService jwtService)
 		{
-			this._mapper = mapper;
+			_jwtService = jwtService;
+			_mapper = mapper;
 			_context = context;
 		}
 
@@ -35,5 +40,19 @@ namespace IntermediaryTransactionsApp.Service
 			
 			return true;
 		}
-	}
+
+        public async Task<List<Message>> GetMessages()
+        {
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            return await _context.Messages
+                .Where(i => i.UserId == userId)
+                .ToListAsync();
+
+        }
+    }
 }

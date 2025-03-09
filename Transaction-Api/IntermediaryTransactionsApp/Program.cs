@@ -89,6 +89,18 @@ builder.Services.AddAuthorization(options =>
 		policy.Requirements.Add(new SameUserRequirement()));
 });
 
+// Config CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddControllers()
     .AddOData(opt => opt
                 .Select()
@@ -112,7 +124,7 @@ builder.Services.AddDatabaseService(builder.Configuration.GetConnectionString("D
 
 var app = builder.Build();
 
-// config hanlder exception
+// config handle exception
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -122,6 +134,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();

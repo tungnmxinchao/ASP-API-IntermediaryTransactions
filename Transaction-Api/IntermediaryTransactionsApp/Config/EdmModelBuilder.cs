@@ -1,4 +1,5 @@
-﻿using IntermediaryTransactionsApp.Dtos.OrderDto;
+﻿using IntermediaryTransactionsApp.Db.Models;
+using IntermediaryTransactionsApp.Dtos.OrderDto;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -10,6 +11,9 @@ namespace IntermediaryTransactionsApp.Config
         {
             var builder = new ODataConventionModelBuilder();
 
+            builder.EntitySet<TransactionHistory>("TransactionHistory");
+            builder.EntitySet<Message>("Message");
+
             ConfigureOrderEntity(builder);
             ConfigureUserEntity(builder);
 
@@ -18,6 +22,7 @@ namespace IntermediaryTransactionsApp.Config
 
         private static void ConfigureOrderEntity(ODataConventionModelBuilder builder)
         {
+           
             var orderEntity = builder.EntitySet<OrdersPublicResponse>("Order").EntityType;
 
             orderEntity.HasKey(o => o.Id);
