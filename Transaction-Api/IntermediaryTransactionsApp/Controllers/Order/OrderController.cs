@@ -1,4 +1,5 @@
-﻿using IntermediaryTransactionsApp.Dtos.ApiDTO;
+﻿using IntermediaryTransactionsApp.Db.Models;
+using IntermediaryTransactionsApp.Dtos.ApiDTO;
 using IntermediaryTransactionsApp.Dtos.OrderDto;
 using IntermediaryTransactionsApp.Exceptions;
 using IntermediaryTransactionsApp.Interface.IOrderService;
@@ -6,6 +7,7 @@ using IntermediaryTransactionsApp.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace IntermediaryTransactionsApp.Controllers.Order
 {
@@ -122,6 +124,22 @@ namespace IntermediaryTransactionsApp.Controllers.Order
                 return Ok(new ApiResponse<OrderDetailResponse>(200, "Get order details successfully", result));
             }
             return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>(404, "Not found order"));
+        }
+
+        [EnableQuery]
+        [HttpGet]      
+        [AllowAnonymous]
+        public async Task<IActionResult> Get()
+        {
+            var orders = await _orderService.GetOrdersPublic();
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound(new ApiResponse<List<OrdersPublicResponse>>(404, "No public orders found"));
+            }
+
+            return Ok(orders);
+
         }
     }
 }

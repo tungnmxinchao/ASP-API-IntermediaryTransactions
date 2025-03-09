@@ -1,3 +1,4 @@
+﻿
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -16,6 +17,7 @@ using IntermediaryTransactionsApp.Strategies;
 using IntermediaryTransactionsApp.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.OData;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 
@@ -88,10 +90,20 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddControllers()
+    .AddOData(opt => opt
+                .Select()
+                .Filter()
+                .OrderBy()
+                .Expand()
+                .Count()
+                .SetMaxTop(100)
+                .AddRouteComponents("odata", EdmModelBuilder.GetEdmModel())
+            )
 	.AddJsonOptions(options =>
 	{
 		options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 	});
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -37,7 +37,11 @@ namespace IntermediaryTransactionsApp.Config
             CreateMap<Order, OrderDetailResponse>()
                .ForMember(dest => dest.Customer, opt => opt.MapFrom(src => src.CustomerUser))
                .ForMember(dest => dest.CreatedByUser, opt => opt.MapFrom(src => src.CreatedByUser));
-           
+
+            CreateMap<Order, OrdersPublicResponse>()
+               .ForMember(dest => dest.CustomerUser, opt => opt.MapFrom(src => src.CustomerUser))
+               .ForMember(dest => dest.CreatedByUser, opt => opt.MapFrom(src => src.CreatedByUser));
+
 
         }
 	}

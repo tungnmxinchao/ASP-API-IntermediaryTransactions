@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Net.NetworkInformation;
+using AutoMapper;
 using IntermediaryTransactionsApp.Commands;
 using IntermediaryTransactionsApp.Constants;
 using IntermediaryTransactionsApp.Db.Models;
@@ -383,6 +384,16 @@ namespace IntermediaryTransactionsApp.Service
             }
 
             return response;
+        }
+
+        public async Task<List<OrdersPublicResponse>> GetOrdersPublic()
+        {
+            var orders =  await _context.Orders
+                         .Include(c => c.CreatedByUser)
+                         .Include(c => c.CustomerUser)
+                         .Where(o => o.IsPublic == true && o.Updateable == true)
+                         .ToListAsync();
+            return _mapper.Map<List<OrdersPublicResponse>>(orders);
         }
 	}
 }
