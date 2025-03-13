@@ -13,6 +13,8 @@ namespace IntermediaryTransactionsApp.Config
 
             builder.EntitySet<TransactionHistory>("TransactionHistory");
             builder.EntitySet<Message>("Message");
+            builder.EntitySet<Order>("MyOrder");
+            builder.EntitySet<MyPurchase>("MyPurchase");
 
             ConfigureOrderEntity(builder);
             ConfigureUserEntity(builder);

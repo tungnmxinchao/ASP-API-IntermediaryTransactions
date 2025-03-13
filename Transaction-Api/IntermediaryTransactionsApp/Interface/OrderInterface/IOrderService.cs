@@ -1,4 +1,5 @@
-﻿using IntermediaryTransactionsApp.Dtos.OrderDto;
+﻿using IntermediaryTransactionsApp.Db.Models;
+using IntermediaryTransactionsApp.Dtos.OrderDto;
 
 namespace IntermediaryTransactionsApp.Interface.IOrderService
 {
@@ -23,5 +24,9 @@ namespace IntermediaryTransactionsApp.Interface.IOrderService
         public Task<OrderDetailResponse> GetOrderDetail(Guid orderId);
 
         public Task<List<OrdersPublicResponse>> GetOrdersPublic();
+
+        public Task<List<Order>> GetMySaleOrders();
+
+        public Task<List<MyPurchase>> GetMyPurchaseOrders();
     }
 }

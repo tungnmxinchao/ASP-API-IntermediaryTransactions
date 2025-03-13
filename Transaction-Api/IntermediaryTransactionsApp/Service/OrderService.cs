@@ -110,6 +110,7 @@ namespace IntermediaryTransactionsApp.Service
 			var totalMoneyForBuyer = _feeCalculationService.CalculateTotalForBuyer(request.MoneyValue, request.IsSellerChargeFee);
 			var sellerReceivedOnSuccess = _feeCalculationService.CalculateSellerReceived(request.MoneyValue, request.IsSellerChargeFee);
 
+            order.Contact = request.Contact;
 			order.Title = request.Title;
 			order.Description = request.Description;
 			order.IsPublic = request.IsPublic;
@@ -395,5 +396,38 @@ namespace IntermediaryTransactionsApp.Service
                          .ToListAsync();
             return _mapper.Map<List<OrdersPublicResponse>>(orders);
         }
-	}
+
+        public async Task<List<Order>> GetMySaleOrders()
+        {
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            var orders = await _context.Orders
+                         .Include(c => c.CreatedByUser)
+                         .Include(c => c.CustomerUser)
+                          .Where(o => o.CreatedBy == userId)
+                         .ToListAsync();
+            return orders;
+        }
+
+        public async Task<List<MyPurchase>> GetMyPurchaseOrders()
+        {
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            var orders = await _context.Orders
+                         .Include(c => c.CreatedByUser)
+                         .Include(c => c.CustomerUser)
+                          .Where(o => o.Customer == userId)
+                         .ToListAsync();
+            return _mapper.Map<List<MyPurchase>>(orders);
+      
+        }
+    }
 }

@@ -137,6 +137,6 @@ namespace IntermediaryTransactionsApp.Controllers.Order
 
             return Ok(orders);
 
-        }
+        }    
     }
 }

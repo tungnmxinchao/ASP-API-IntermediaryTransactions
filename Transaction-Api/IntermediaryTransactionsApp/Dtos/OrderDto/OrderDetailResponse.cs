@@ -6,6 +6,8 @@ namespace IntermediaryTransactionsApp.Dtos.OrderDto
         public string Title { get; set; }
         public string Description { get; set; }
         public bool IsPublic { get; set; }
+        public int StatusId { get; set; }
+        public string Contact { get; set; }
         public string? HiddenValue { get; set; }
         public decimal MoneyValue { get; set; }
         public bool IsSellerChargeFee { get; set; }
@@ -15,6 +17,7 @@ namespace IntermediaryTransactionsApp.Dtos.OrderDto
         public bool Updateable { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public string ShareLink { get; set; }
         public UserBasicInfoDto? Customer { get; set; }
         public UserBasicInfoDto CreatedByUser { get; set; }
     }
