@@ -348,6 +348,43 @@ namespace IntermediaryTransactionsApp.Service
 
         }
 
+        public async Task<bool> ResolveDispute(DisputeRequest request)
+        {
+            var userId = _jwtService.GetUserIdFromToken();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFoundInToken));
+            }
+
+            var specification = new DisputeOrder(request.OrderId);
+            var order = await ApplySpecification(specification).FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.NotHavePermisson));
+            }
+
+
+            var command = new ResolveOrderCommand(
+                request,
+                _historyService,
+                _userService,
+                order,
+                _context,
+                _messageService,
+                _unitOfWorkDb);
+
+            var result = await command.ExecuteAsync();
+
+            if (result)
+            {
+                return true;
+            }
+
+            return false;
+
+        }
+
         private IQueryable<Order> ApplySpecification(ISpecification<Order> spec)
 		{
 			return SpecificationEvaluator<Order>.GetQuery(_context.Orders.AsQueryable(), spec);

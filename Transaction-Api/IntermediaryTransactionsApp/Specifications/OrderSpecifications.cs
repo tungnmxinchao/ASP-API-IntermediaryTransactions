@@ -93,4 +93,13 @@ namespace IntermediaryTransactionsApp.Specifications
         {
         }
     }
+
+    public class DisputeOrder : BaseSpecification<Order>
+    {
+        public DisputeOrder(Guid orderId)
+            : base(order => order.Id == orderId &&
+                          order.StatusId == 7 )
+        {
+        }
+    }
 } 

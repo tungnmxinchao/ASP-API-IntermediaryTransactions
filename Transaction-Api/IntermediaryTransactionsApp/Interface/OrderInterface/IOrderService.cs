@@ -21,6 +21,8 @@ namespace IntermediaryTransactionsApp.Interface.IOrderService
 
         public Task<bool> CancelOrder(Guid orderId);
 
+        public Task<bool> ResolveDispute(DisputeRequest request);
+
         public Task<OrderDetailResponse> GetOrderDetail(Guid orderId);
 
         public Task<List<OrdersPublicResponse>> GetOrdersPublic();

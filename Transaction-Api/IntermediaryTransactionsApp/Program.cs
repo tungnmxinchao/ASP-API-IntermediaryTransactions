@@ -85,7 +85,10 @@ builder.Services.AddAuthorization(options =>
 	options.AddPolicy("CustomerPolicy", policy =>
 		policy.RequireRole("Customer"));
 
-	options.AddPolicy("SameUserPolicy", policy =>
+    options.AddPolicy("CustomerOrAdminPolicy", policy =>
+        policy.RequireRole("Customer", "Admin"));
+
+    options.AddPolicy("SameUserPolicy", policy =>
 		policy.Requirements.Add(new SameUserRequirement()));
 });
 

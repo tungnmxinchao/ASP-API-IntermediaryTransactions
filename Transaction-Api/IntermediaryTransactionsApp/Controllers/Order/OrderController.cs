@@ -10,8 +10,8 @@ namespace IntermediaryTransactionsApp.Controllers.Order
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	[Authorize(Policy = "CustomerPolicy")]
-	public class OrderController : ControllerBase
+    [Authorize(Policy = "CustomerOrAdminPolicy")]
+    public class OrderController : ControllerBase
 	{
 		private readonly IOrderService _orderService;
 
@@ -111,6 +111,20 @@ namespace IntermediaryTransactionsApp.Controllers.Order
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>(500, "Failed to cancel order"));
         }
 
+       
+        [HttpPost("{orderId}/resolve-dispute")]
+        public async Task<IActionResult> ResolveDispute([FromBody] DisputeRequest disputeRequest)
+        {
+            var result = await _orderService.ResolveDispute(disputeRequest);
+
+            if (result)
+            {
+                return Ok(new ApiResponse<UpdateOrderResponse>(200, "Get order details successfully"));
+            }
+            return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>(404, "Not found order"));
+        }
+
+        
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderDetail(Guid orderId)
         {

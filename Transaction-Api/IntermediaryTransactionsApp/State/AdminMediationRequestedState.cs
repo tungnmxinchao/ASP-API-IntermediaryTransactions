@@ -8,9 +8,11 @@ namespace IntermediaryTransactionsApp.State
             throw new InvalidOperationException("Không thể gọi admin xử lý.");
         }
 
-        public Task CancelOrder(OrderContext context)
+        public async Task CancelOrder(OrderContext context)
         {
-            throw new NotImplementedException();
+            context.Order.StatusId = (int)OrderState.Canceled;
+            context.SetState(new CancelSate());
+            await Task.CompletedTask;
         }
 
         public Task Complain(OrderContext context)

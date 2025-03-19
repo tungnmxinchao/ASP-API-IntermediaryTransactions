@@ -629,4 +629,160 @@ namespace IntermediaryTransactionsApp.Commands
 
     }
 
+    public class ResolveOrderCommand : ICommand<bool>
+    {
+        private readonly IUserService _userService;
+        private readonly ApplicationDbContext _context;
+        private readonly IMessageService _messageService;
+        private readonly IUnitOfWorkPersistDb _unitOfWorkDb;
+        private readonly Order _order;
+        private readonly IHistoryService _historyService;
+        private readonly DisputeRequest _disputeRequest;
+
+        public ResolveOrderCommand(
+            DisputeRequest request,
+            IHistoryService historyService,
+            IUserService userService,
+            Order order,
+            ApplicationDbContext context,
+            IMessageService messageService,
+            IUnitOfWorkPersistDb unitOfWorkDb)
+        {
+            _disputeRequest = request;
+            _historyService = historyService;
+            _userService = userService;
+            _order = order;
+            _context = context;
+            _messageService = messageService;
+            _unitOfWorkDb = unitOfWorkDb;
+        }
+
+        public async Task<bool> ExecuteAsync()
+        {
+            await _unitOfWorkDb.BeginTransactionAsync();
+
+            try
+            {
+                var orderContext = new OrderContext(_order);
+
+                await orderContext.CancelOrder();
+                _context.Update(_order);
+            
+                //back money to buyer
+                await UpdateUserBalance();
+
+                // Create record back money for buyer
+                await RecordBackMoneyHistory(_order.Id);
+
+                int penalizedParty = _order.CreatedBy;
+
+                if (_disputeRequest.isSellerCorrect)
+                {
+                    penalizedParty = (int) _order.Customer;
+                }
+
+                await FineGuiltyParty(penalizedParty, Constants.Constants.FeeCallAdmin);
+
+                // Create history sub money for fineGuiltyParty
+                await RecordFineGuiltyPartyHistory(penalizedParty, _order.Id, Constants.Constants.FeeCallAdmin);
+
+                await NotifyBuyer( (int) _order.Customer);
+
+                await NotifySeller((int)_order.CreatedBy);
+
+                await _unitOfWorkDb.SaveChangesAsync();
+
+                await _unitOfWorkDb.CommitAsync();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                await _unitOfWorkDb.RollbackAsync();
+                throw;
+            }
+        }
+
+        private async Task FineGuiltyParty(int penalizedParty, decimal feeCallAdmin)
+        {
+            var updateMoney = new UpdateMoneyRequest
+            {
+                UserId = penalizedParty,
+                Money = feeCallAdmin,
+                TypeUpdate = (int)UpdateMoneyMode.SubMoney
+            };
+            await _userService.UpdateMoney(updateMoney);
+
+        }
+
+        private async Task RecordFineGuiltyPartyHistory(int penalizedParty, Guid orderId, decimal money)
+        {
+            var historyRequest = new CreateHistoryRequest
+            {
+                Amount = money,
+                TransactionType = (int)UpdateMoneyMode.SubMoney,
+                Note = $"Trừ phí phạt do khiếu nại sai đơn hàng: {orderId}",
+                Payload = "Giao dịch thành công",
+                UserId = penalizedParty,
+                OnDoneLink = "Example@gmail.com"
+            };
+
+            await _historyService.CreateHistory(historyRequest);
+        }
+
+        private async Task RecordBackMoneyHistory(Guid orderId)
+        {
+            var historyRequest = new CreateHistoryRequest
+            {
+                Amount = _order.TotalMoneyForBuyer,
+                TransactionType = (int)UpdateMoneyMode.AddMoney,
+                Note = $"Hoàn tiền do bị hủy từ đơn hàng: {orderId}",
+                Payload = "Giao dịch thành công",
+                UserId = (int)_order.Customer,
+                OnDoneLink = "Example@gmail.com"
+            };
+
+            await _historyService.CreateHistory(historyRequest);
+        }
+
+        private async Task UpdateUserBalance()
+        {
+            var updateMoney = new UpdateMoneyRequest
+            {
+                UserId = (int)_order.Customer,
+                Money = _order.TotalMoneyForBuyer,
+                TypeUpdate = (int)UpdateMoneyMode.AddMoney
+            };
+
+            await _userService.UpdateMoney(updateMoney);
+        }
+
+        private async Task NotifyBuyer(int userId)
+        {
+            CreateMessageRequest messageRequest = BuiltNotification(userId);
+
+             await _messageService.CreateMessage(messageRequest);
+        }
+
+        private async Task NotifySeller(int userId)
+        {
+            CreateMessageRequest messageRequest = BuiltNotification(userId);
+
+            await _messageService.CreateMessage(messageRequest);
+        }
+
+        public CreateMessageRequest BuiltNotification(int userId)
+        {
+            var messageRequest = new CreateMessageRequest
+            {
+                Subject = $"Xử lý khiếu nại hoàn tất mã số: {_order.Id}",
+                Content = $"Trạng thái đơng hàng: Hủy đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                UserId = userId
+            };
+
+            return messageRequest;
+        }
+
+    }
+
 } 

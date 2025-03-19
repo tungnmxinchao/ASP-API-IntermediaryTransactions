@@ -10,7 +10,8 @@ namespace IntermediaryTransactionsApp.Specifications
                 // Nếu order chưa được mua thì ai cũng xem được (nhưng nội dung ẩn sẽ được xử lý ở service)
                 order.Updateable ||
                 // Nếu order đã được mua thì chỉ người mua và người bán mới xem được
-                (!order.Updateable && (order.CreatedBy == userId || order.Customer == userId))
+                (!order.Updateable && (order.CreatedBy == userId 
+                    || order.Customer == userId || userId == Constants.Constants.AdminId))
             ))
         {
             AddInclude(o => o.CreatedByUser);
