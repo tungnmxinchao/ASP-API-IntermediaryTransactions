@@ -12,6 +12,7 @@ using IntermediaryTransactionsApp.Service;
 using IntermediaryTransactionsApp.State;
 using IntermediaryTransactionsApp.UnitOfWork;
 
+
 namespace IntermediaryTransactionsApp.Commands
 {
     public class CreateOrderCommand : ICommand<Order>
@@ -115,7 +116,8 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 Subject = $"Hệ thống đã ghi nhận yêu trung gian mã số: {orderId}",
                 Content = $"Hệ thống đã ghi nhận yêu cầu trung gian mã số: {orderId}!\r\nVui lòng nhấn \"CHI TIẾT\" để xem chi tiết yêu cầu trung gian",
-                UserId = _userId
+                UserId = _userId,
+                OrderId = orderId
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -130,7 +132,7 @@ namespace IntermediaryTransactionsApp.Commands
                 Note = $"Thu phí tạo yêu cầu trung gian mã số: {orderId}",
                 Payload = "Giao dịch thành công",
                 UserId = _userId,
-                OnDoneLink = "Example@gmail.com"
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}"
             };
 
             await _historyService.CreateHistory(historyRequest);
@@ -220,7 +222,9 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 Subject = $"Hoàn thành xử lý thanh toán giao dịch mã số: {_order.Id}",
                 Content = $"Trạng thái giao dịch: Thành công\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
-                UserId = _userId
+                UserId = _userId,
+                OrderId = _order.Id
+                
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -235,7 +239,7 @@ namespace IntermediaryTransactionsApp.Commands
                 Note = $"Thu phí thực hiện mua đơn hàng mã số: {_order.Id}",
                 Payload = "Giao dịch thành công",
                 UserId = _userId,
-                OnDoneLink = "Example@gmail.com"
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{order.Id}"
             };
 
             await _historyService.CreateHistory(historyRequest);
@@ -307,7 +311,7 @@ namespace IntermediaryTransactionsApp.Commands
                 Note = $"Cộng tiền hoàn thành đơn trung gian mã số: {orderId}",
                 Payload = "Giao dịch thành công",
                 UserId = _order.CreatedBy,
-                OnDoneLink = "Example@gmail.com"
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}"
             };
 
             await _historyService.CreateHistory(historyRequest);
@@ -331,7 +335,9 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 Subject = $"Hoàn thành đơn hàng mã số: {_order.Id}",
                 Content = $"Trạng thái đơng hàng: Hoàn thành\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
-                UserId = _order.CreatedBy
+                UserId = _order.CreatedBy,
+                OrderId = _order.Id
+                
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -391,7 +397,9 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 Subject = $"Ghi nhận khiếu nại đơn hàng mã số: {_order.Id}",
                 Content = $"Trạng thái đơng hàng: Người mua khiếu nại đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
-                UserId = _order.CreatedBy
+                UserId = _order.CreatedBy,
+                OrderId = _order.Id
+                
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -451,7 +459,8 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 Subject = $"Ghi nhận yêu cầu kiểm tra hàng mã số: {_order.Id}",
                 Content = $"Trạng thái đơng hàng: Người bán yều cầu khách hàng kiểm tra lại đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
-                UserId = (int)_order.Customer
+                UserId = (int)_order.Customer,
+                OrderId = _order.Id
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -513,7 +522,8 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 Subject = $"Yêu cầu admin xử lý hàng mã số: {_order.Id}",
                 Content = $"Trạng thái đơng hàng: Yêu cầu admin xử lý đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
-                UserId = (int) _order.Customer
+                UserId = (int) _order.Customer,
+                OrderId = _order.Id
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -525,7 +535,8 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 Subject = $"Yêu cầu admin xử lý hàng mã số: {_order.Id}",
                 Content = $"Trạng thái đơng hàng: Yêu cầu admin xử lý đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
-                UserId = _order.CreatedBy
+                UserId = _order.CreatedBy,
+                OrderId = _order.Id
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -597,7 +608,7 @@ namespace IntermediaryTransactionsApp.Commands
                 Note = $"Hoàn tiền cho người mua do đơn hàng lỗi mã số: {orderId}",
                 Payload = "Giao dịch thành công",
                 UserId = (int) _order.Customer,
-                OnDoneLink = "Example@gmail.com"
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}"
             };
 
             await _historyService.CreateHistory(historyRequest);
@@ -621,7 +632,9 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 Subject = $"Hoàn tiền cho người mua do đơn hàng lỗi mã số: {_order.Id}",
                 Content = $"Trạng thái đơng hàng: Hủy đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
-                UserId = (int)_order.Customer
+                UserId = (int)_order.Customer,
+                OrderId = _order.Id
+                
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -724,7 +737,7 @@ namespace IntermediaryTransactionsApp.Commands
                 Note = $"Trừ phí phạt do khiếu nại sai đơn hàng: {orderId}",
                 Payload = "Giao dịch thành công",
                 UserId = penalizedParty,
-                OnDoneLink = "Example@gmail.com"
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}"
             };
 
             await _historyService.CreateHistory(historyRequest);
@@ -739,7 +752,7 @@ namespace IntermediaryTransactionsApp.Commands
                 Note = $"Hoàn tiền do bị hủy từ đơn hàng: {orderId}",
                 Payload = "Giao dịch thành công",
                 UserId = (int)_order.Customer,
-                OnDoneLink = "Example@gmail.com"
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}"
             };
 
             await _historyService.CreateHistory(historyRequest);
@@ -777,7 +790,8 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 Subject = $"Xử lý khiếu nại hoàn tất mã số: {_order.Id}",
                 Content = $"Trạng thái đơng hàng: Hủy đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
-                UserId = userId
+                UserId = userId,
+                OrderId = _order.Id
             };
 
             return messageRequest;

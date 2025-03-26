@@ -12,5 +12,8 @@ namespace IntermediaryTransactionsApp.Dtos.MessageDto
 		public string Content { get; set; }
 		[Required]
 		public int UserId { get; set; }
-	}
+
+        [Required]
+        public Guid OrderId { get; set; }
+    }
 }

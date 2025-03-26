@@ -31,7 +31,7 @@ namespace IntermediaryTransactionsApp.Service
 			var message = _mapper.Map<Message>(createMessageRequest);
 
 			message.Level = "info";
-			message.OpenUrl = "example.com";
+			message.OpenUrl = $"{Constants.Constants.BaseUrlShareLink}/{createMessageRequest.OrderId}";
 			message.Payload = "json";
 			message.UserId = createMessageRequest.UserId;
 
