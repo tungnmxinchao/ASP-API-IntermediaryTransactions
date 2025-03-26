@@ -85,9 +85,9 @@ namespace IntermediaryTransactionsApp.Commands
 
             var order = _mapper.Map<Order>(_request);
             order.CreatedBy = _userId;
-            order.StatusId = 1;
+            order.StatusId = (int)OrderState.ReadyForTransaction;
             order.IsPaidToSeller = true;
-            order.ShareLink = Guid.NewGuid().ToString();
+            order.ShareLink = $"{Constants.Constants.BaseUrlShareLink}/{order.Id}";
             order.FeeOnSuccess = feeOnSuccess;
             order.TotalMoneyForBuyer = totalMoneyForBuyer;
             order.SellerReceivedOnSuccess = sellerReceivedOnSuccess;

@@ -7,5 +7,7 @@
         public static decimal FeeCallAdmin = 50000;
 
 		public static int AdminId = 2;
+
+		public static string BaseUrlShareLink = "http://localhost:3000/transaction";
     }
 }
