@@ -21,9 +21,9 @@ namespace IntermediaryTransactionsApp.Db.Models
 
 		public bool IsActive { get; set; } = true;
 		public DateTime CreatedAt { get; set; } = DateTime.Now;
-		public DateTime? UpdatedAt { get; set; }
+		public DateTime? UpdatedAt { get; set; } = DateTime.Now;
 
-		public decimal Money { get; set; }
+        public decimal Money { get; set; }
 
 		public int RoleId { get; set; }
 		public virtual Role Role { get; set; }

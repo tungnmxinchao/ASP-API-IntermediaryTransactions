@@ -39,7 +39,34 @@ namespace IntermediaryTransactionsApp.Service
 
 		}
 
-		public async Task<List<TransactionHistory>> GetHistoryTransactions()
+        public async Task<bool> UpdateHistory(int historyId, bool isProcess)
+		{
+			var history = _context.TransactionHistories.Find(historyId);
+
+            if (history == null)
+            {
+                throw new ObjectNotFoundException("Object history request not found");
+            }
+
+			history.IsProcessed = isProcess;
+
+			_context.Update(history);
+
+			return await _context.SaveChangesAsync() > 0;
+        }
+        public async Task<List<AdminTransactionHistory>> FindAll()
+        {
+			var histories = await _context.TransactionHistories
+				.Include(u => u.User)
+                .ToListAsync();
+
+			var response = _mapper.Map<List<AdminTransactionHistory>>(histories);
+
+			return response;       
+
+        }
+
+        public async Task<List<TransactionHistory>> GetHistoryTransactions()
 		{
             var userId = _jwtService.GetUserIdFromToken();
             if (userId == null)

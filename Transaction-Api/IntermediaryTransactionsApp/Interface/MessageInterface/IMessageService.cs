@@ -9,5 +9,7 @@ namespace IntermediaryTransactionsApp.Interface.MessageInterface
 
 		public Task<List<Message>> GetMessages();
 
+		public Task<bool> UpdateMessage(int messageId);
+
     }
 }

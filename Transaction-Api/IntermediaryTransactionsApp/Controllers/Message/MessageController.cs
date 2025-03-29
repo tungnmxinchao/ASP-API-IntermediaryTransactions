@@ -1,4 +1,5 @@
 ﻿
+using System.Net;
 using IntermediaryTransactionsApp.Db.Models;
 using IntermediaryTransactionsApp.Dtos.ApiDTO;
 using IntermediaryTransactionsApp.Interface.MessageInterface;
@@ -11,7 +12,7 @@ namespace IntermediaryTransactionsApp.Controllers.Message
 {
 
     [Route("api/[controller]")]
-    [Authorize(Policy = "CustomerPolicy")]
+    [Authorize(Policy = "CustomerOrAdminPolicy")]
     [ApiController]
     public class MessageController : ControllerBase
     {
@@ -34,6 +35,18 @@ namespace IntermediaryTransactionsApp.Controllers.Message
             }
 
             return Ok(messages);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update(int messageId)
+        {
+            var result = await _messageService.UpdateMessage(messageId);
+
+            if (!result)
+            {
+                return BadRequest(new ApiResponse<string>((int) HttpStatusCode.InternalServerError, "Update message failed"));
+            }
+            return Ok(result);
         }
     }
 }

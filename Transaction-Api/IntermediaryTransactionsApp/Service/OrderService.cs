@@ -434,6 +434,15 @@ namespace IntermediaryTransactionsApp.Service
             return _mapper.Map<List<OrdersPublicResponse>>(orders);
         }
 
+        public async Task<List<AdminGetOrderResponse>> FindAll()
+        {
+            var orders = await _context.Orders
+                         .Include(c => c.CreatedByUser)
+                         .Include(c => c.CustomerUser)
+                         .ToListAsync();
+            return _mapper.Map<List<AdminGetOrderResponse>>(orders);
+        }
+
         public async Task<List<Order>> GetMySaleOrders()
         {
             var userId = _jwtService.GetUserIdFromToken();

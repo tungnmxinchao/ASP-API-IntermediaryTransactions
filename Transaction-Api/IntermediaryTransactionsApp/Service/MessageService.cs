@@ -54,5 +54,23 @@ namespace IntermediaryTransactionsApp.Service
                 .ToListAsync();
 
         }
+
+		public async Task<bool> UpdateMessage(int messageId)
+		{
+			var message = _context.Messages.Find(messageId);
+
+			if(message == null)
+			{
+				throw new ObjectNotFoundException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFound));
+			}
+            message.Seen = true;
+			message.Read = true;
+            message.UpdatedAt = DateTime.UtcNow;
+
+            _context.Messages.Update(message);
+
+			return await _context.SaveChangesAsync() > 0;
+
+        }
     }
 }

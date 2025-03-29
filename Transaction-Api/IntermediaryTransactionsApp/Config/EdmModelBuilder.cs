@@ -1,5 +1,7 @@
 ﻿using IntermediaryTransactionsApp.Db.Models;
+using IntermediaryTransactionsApp.Dtos.HistoryDto;
 using IntermediaryTransactionsApp.Dtos.OrderDto;
+using IntermediaryTransactionsApp.Dtos.UserDto;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -15,6 +17,16 @@ namespace IntermediaryTransactionsApp.Config
             builder.EntitySet<Message>("Message");
             builder.EntitySet<Order>("MyOrder");
             builder.EntitySet<MyPurchase>("MyPurchase");
+
+            var user = builder.EntitySet<GetUserResponse>("Users").EntityType;
+            user.HasKey(u => u.Id);
+
+            var adminGetOrders = builder.EntitySet<AdminGetOrderResponse>("AdminViewOrders").EntityType;
+            adminGetOrders.HasKey(o => o.Id);
+
+            var adminGetTransactionHistories = builder.EntitySet<AdminTransactionHistory>("AdminViewTransactions").EntityType;
+            adminGetOrders.HasKey(o => o.Id);
+
 
             ConfigureOrderEntity(builder);
             ConfigureUserEntity(builder);

@@ -45,7 +45,41 @@ namespace IntermediaryTransactionsApp.Controllers.User
 			return BadRequest();
 
 		}
-		[HttpGet("{id}")]
+
+        [Authorize(Policy = "SameUserPolicy")]
+        [HttpPut("{Id}")]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest request, int Id)
+        {
+            var result = await _userService.UpdateUser(Id, request);
+
+
+            if (!result)
+            {
+                ApiResponse<string> apiResponse = new ApiResponse<string>((int)HttpStatusCode.InternalServerError, "Update failed!");
+                return BadRequest(apiResponse);
+            }
+            return Ok(result);
+
+        }
+
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpPut("{Id}/admin-update-user")]
+        public async Task<IActionResult> AdminUpdateUser([FromBody] UpdateUserRequest request, int Id)
+        {
+            var result = await _userService.UpdateUser(Id, request);
+
+
+            if (!result)
+            {
+                ApiResponse<string> apiResponse = new ApiResponse<string>((int)HttpStatusCode.InternalServerError, "Update failed!");
+                return BadRequest(apiResponse);
+            }
+            return Ok(result);
+
+        }
+
+
+        [HttpGet("{id}")]
 		[Authorize(Policy = "SameUserPolicy")]
 		public async Task<IActionResult> GetUserById([FromRoute] int id)
 		{

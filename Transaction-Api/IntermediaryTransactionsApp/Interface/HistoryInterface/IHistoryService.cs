@@ -9,5 +9,9 @@ namespace IntermediaryTransactionsApp.Interface.HistoryInterface
 
 		public Task<List<TransactionHistory>> GetHistoryTransactions();
 
+		public Task<List<AdminTransactionHistory>> FindAll();
+
+        public Task<bool> UpdateHistory(int historyId, bool isProcess);
+
     }
 }

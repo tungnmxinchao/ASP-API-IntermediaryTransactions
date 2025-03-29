@@ -44,6 +44,12 @@ namespace IntermediaryTransactionsApp.Config
 
             CreateMap<Order, MyPurchase>().ReverseMap();
 
+            CreateMap<Order, AdminGetOrderResponse>()
+               .ForMember(dest => dest.Customer, opt => opt.MapFrom(src => src.CustomerUser))
+               .ForMember(dest => dest.CreatedByUser, opt => opt.MapFrom(src => src.CreatedByUser));
+
+            CreateMap<TransactionHistory, AdminTransactionHistory>().ReverseMap();
+
 
         }
 	}

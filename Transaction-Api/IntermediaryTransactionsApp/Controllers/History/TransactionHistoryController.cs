@@ -1,4 +1,5 @@
-﻿using IntermediaryTransactionsApp.Db.Models;
+﻿using System.Diagnostics;
+using IntermediaryTransactionsApp.Db.Models;
 using IntermediaryTransactionsApp.Dtos.ApiDTO;
 using IntermediaryTransactionsApp.Interface.HistoryInterface;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.OData.Query;
 namespace IntermediaryTransactionsApp.Controllers.History
 {
     [Route("api/[controller]")]
-    [Authorize(Policy = "CustomerPolicy")]
     [ApiController]
     public class TransactionHistoryController : ControllerBase
     {
@@ -20,6 +20,7 @@ namespace IntermediaryTransactionsApp.Controllers.History
             _historyService = historyService;
         }
 
+        [Authorize(Policy = "CustomerPolicy")]
         [EnableQuery]
         [HttpGet]
         public async Task<IActionResult> Get()
@@ -32,6 +33,20 @@ namespace IntermediaryTransactionsApp.Controllers.History
             }
 
             return Ok(histories);
+        }
+
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpPut("{Id}/{IsProcess}")]
+        public async Task<IActionResult> UpdateHistory(int Id, bool IsProcess)
+        {
+            var result = await _historyService.UpdateHistory(Id, IsProcess);
+
+            if (!result)
+            {
+                return BadRequest(new ApiResponse<List<string>>(404, "Update failed"));
+            }
+
+            return Ok(result);
         }
     }
 }

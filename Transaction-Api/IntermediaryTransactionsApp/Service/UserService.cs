@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using IntermediaryTransactionsApp.Constants;
 using IntermediaryTransactionsApp.Db.Models;
 using IntermediaryTransactionsApp.Dtos.UserDto;
 using IntermediaryTransactionsApp.Exceptions;
@@ -17,6 +18,16 @@ namespace IntermediaryTransactionsApp.Service
 			_context = context;
 			_mapper = mapper;
 		}
+
+		public async Task<List<GetUserResponse>> FindAll()
+		{
+			var users = await _context.Users.Include(r => r.Role).ToListAsync();
+
+			var usersResponse = _mapper.Map<List<GetUserResponse>>(users);
+
+			return usersResponse;
+
+        }
 
 		public async Task<CreateUserResponse> CreateUser(CreateUserRequest createUserRequest)
 		{
@@ -93,5 +104,28 @@ namespace IntermediaryTransactionsApp.Service
 			}
 			return false;
         }
+
+		public async Task<bool> UpdateUser(int userId, UpdateUserRequest request)
+		{
+            var user = _context.Users.Find(userId);
+
+			if(user == null)
+			{
+                throw new ObjectNotFoundException(ErrorMessageExtensions.GetMessage(ErrorMessages.ObjectNotFound));
+            }
+
+			user.Email = request.Email;
+
+            user.RoleId = request.RoleId.HasValue ? request.RoleId.Value : user.RoleId;
+            user.IsActive = request.IsActive.HasValue ? request.IsActive.Value : user.IsActive;
+
+			user.UpdatedAt = DateTime.Now;
+
+            _context.Users.Update(user);
+
+			return await _context.SaveChangesAsync() > 0;
+        }
+
+		
     }
 }

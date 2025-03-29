@@ -13,5 +13,9 @@ namespace IntermediaryTransactionsApp.Interface.UserInterface
 
 		public bool CheckBalanceUserWithMoney(decimal money, int userId);
 
+        public Task<List<GetUserResponse>> FindAll();
+
+		public Task<bool> UpdateUser(int userId, UpdateUserRequest request);
+
     }
 }
