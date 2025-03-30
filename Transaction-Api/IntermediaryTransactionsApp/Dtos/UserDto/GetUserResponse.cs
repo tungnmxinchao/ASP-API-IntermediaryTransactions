@@ -7,5 +7,6 @@ namespace IntermediaryTransactionsApp.Dtos.UserDto
 	{
         public int Id { get; set; }
         public RoleResponse role { get; set; }
-	}
+        public decimal Money { get; set; }
+    }
 }
