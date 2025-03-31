@@ -503,6 +503,8 @@ namespace IntermediaryTransactionsApp.Commands
 
                 await NotifySeller();
 
+                await NotifyAdmin();
+
                 await _unitOfWorkDb.SaveChangesAsync();
 
                 await _unitOfWorkDb.CommitAsync();
@@ -536,6 +538,19 @@ namespace IntermediaryTransactionsApp.Commands
                 Subject = $"Yêu cầu admin xử lý hàng mã số: {_order.Id}",
                 Content = $"Trạng thái đơng hàng: Yêu cầu admin xử lý đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
                 UserId = _order.CreatedBy,
+                OrderId = _order.Id
+            };
+
+            await _messageService.CreateMessage(messageRequest);
+        }
+
+        private async Task NotifyAdmin()
+        {
+            var messageRequest = new CreateMessageRequest
+            {
+                Subject = $"Khách hàng yêu quản trị viên xử lý đơn mã số: {_order.Id}",
+                Content = $"Trạng thái đơng hàng: Yêu cầu admin xử lý đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                UserId = Constants.Constants.AdminId,
                 OrderId = _order.Id
             };
 
