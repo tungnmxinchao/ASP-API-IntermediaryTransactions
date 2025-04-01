@@ -32,5 +32,7 @@ namespace IntermediaryTransactionsApp.Interface.IOrderService
         public Task<List<MyPurchase>> GetMyPurchaseOrders();
 
         public Task<List<AdminGetOrderResponse>> FindAll();
+
+        public Task<ProfitResponse> GetProfit();
     }
 }

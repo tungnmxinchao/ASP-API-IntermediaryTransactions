@@ -20,16 +20,14 @@ namespace IntermediaryTransactionsApp.Controllers.Admin
         private readonly IUserService _userService;
         private readonly IOrderService _orderService;
         private readonly IHistoryService _historyService;
-        private readonly IMessageService _messageService;
 
         public AdminController(IUserService userService, 
             IOrderService orderService, IHistoryService 
-            historyService, IMessageService messageService)
+            historyService)
         {
             _userService = userService;
             _orderService = orderService;
             _historyService = historyService;
-            _messageService = messageService;
         }
 
         [HttpGet("odata/Users")]
@@ -64,6 +62,14 @@ namespace IntermediaryTransactionsApp.Controllers.Admin
             }
 
             return Ok(histories);
+        }
+
+        [HttpGet("Admin/get-profit")]
+        public async Task<IActionResult> GetProfit()
+        {
+            var profit = await _orderService.GetProfit();
+
+            return Ok(profit);
         }
     }
 }

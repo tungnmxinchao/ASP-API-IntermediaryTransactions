@@ -475,5 +475,25 @@ namespace IntermediaryTransactionsApp.Service
             return _mapper.Map<List<MyPurchase>>(orders);
       
         }
+
+        public async Task<ProfitResponse> GetProfit()
+        {
+            var orders = await _context.Orders
+                               .ToListAsync();
+
+            int totalOrder = orders.Count;
+
+          
+            decimal profitOfCreateOrder = totalOrder * Constants.Constants.FeeAddNewOrder;
+
+            decimal profitOfFeeOrder = orders.Sum(o => o.FeeOnSuccess);
+
+            return new ProfitResponse
+            {
+                TotalOrder = totalOrder,
+                ProfitOfCreateOrder = profitOfCreateOrder,
+                ProfitOfFeeOrder = profitOfFeeOrder
+            };
+        }
     }
 }
