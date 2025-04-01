@@ -11,11 +11,10 @@ namespace IntermediaryTransactionsApp.Controllers.ZaloPay
     {
         private string key2 = "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf";
 
-        [HttpPost("zalopay-callback")]
+        [HttpPost]
         public IActionResult Post([FromBody] dynamic cbdata)
         {
             var result = new Dictionary<string, object>();
-            Console.WriteLine("callback roi!");
 
             try
             {

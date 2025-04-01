@@ -1,4 +1,13 @@
 ﻿using IntermediaryTransactionsApp.Config;
+using IntermediaryTransactionsApp.Db.Models;
+using IntermediaryTransactionsApp.Dtos.HistoryDto;
+using IntermediaryTransactionsApp.Dtos.MessageDto;
+using IntermediaryTransactionsApp.Dtos.UserDto;
+using IntermediaryTransactionsApp.Enum;
+using IntermediaryTransactionsApp.Interface.HistoryInterface;
+using IntermediaryTransactionsApp.Interface.MessageInterface;
+using IntermediaryTransactionsApp.Interface.UserInterface;
+using IntermediaryTransactionsApp.Service;
 using IntermediaryTransactionsApp.Utils;
 using IntermediaryTransactionsApp.Utils.Crypto;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +23,17 @@ namespace IntermediaryTransactionsApp.Controllers.ZaloPay
         private static string app_id = "2554";
         private static string key1 = "sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn";
         private static string create_order_url = "https://sb-openapi.zalopay.vn/v2/create";
+        private readonly IHistoryService _historyService;
+        private readonly ApplicationDbContext _context;
+        private readonly IUserService _userService;
+
+        public DepositController(IHistoryService historyService, 
+            ApplicationDbContext context, IUserService userService)
+        {
+            _historyService = historyService;
+            _context = context;
+            _userService = userService;
+        }
 
         [HttpPost]
         public async Task<IActionResult> Deposit([FromBody] DepositRequest request)
@@ -37,8 +57,53 @@ namespace IntermediaryTransactionsApp.Controllers.ZaloPay
             param.Add("mac", HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, key1, data));
 
             var result = await HttpHelper.PostFormAsync(create_order_url, param);
-            return Ok(result);
+
+            await RecordHistory(request.UserId, request.Amount);
+
+            await UpdateUserBalance(request.UserId, request.Amount);
+
+            _context.SaveChanges();
+
+
+            var response = new
+            {
+                result = result,
+                app_trans_id = app_trans_id
+            };
+
+            return Ok(response);
         }
+
+        private async Task RecordHistory(int userId, int amount)
+        {
+            var historyRequest = new CreateHistoryRequest
+            {
+                Amount = amount,
+                TransactionType = (int)UpdateMoneyMode.AddMoney,
+                Note = $"Nạp tiền vào hệ thống cho người dùng: {userId}",
+                Payload = "Giao dịch thành công",
+                UserId = userId,
+                OnDoneLink = "None"
+            };
+
+            await _historyService.CreateHistory(historyRequest);          
+        }
+
+        private async Task UpdateUserBalance(int userId, int amount)
+        {
+            var updateMoney = new UpdateMoneyRequest
+            {
+                UserId = userId,
+                Money = amount,
+                TypeUpdate = (int)UpdateMoneyMode.AddMoney
+            };
+
+            await _userService.UpdateMoney(updateMoney);
+        }
+
+
+
+
     }
 
     public class DepositRequest
