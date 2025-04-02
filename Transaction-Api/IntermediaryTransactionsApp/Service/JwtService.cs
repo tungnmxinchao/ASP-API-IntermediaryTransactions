@@ -14,11 +14,14 @@ namespace IntermediaryTransactionsApp.Service
 		private readonly JwtSetting _jwtSettings;
 		private readonly RedisService _redisService;
 		private readonly ApplicationDbContext _dbContext;
-		public JwtService(IOptions<JwtSetting> jwtSettings, RedisService redisService, ApplicationDbContext dbContext)
+		private readonly IHttpContextAccessor _contextAccessor;
+		public JwtService(IOptions<JwtSetting> jwtSettings, RedisService redisService, 
+			ApplicationDbContext dbContext, IHttpContextAccessor contextAccessor)
 		{
 			_jwtSettings = jwtSettings.Value;
 			_redisService = redisService;
 			_dbContext = dbContext;
+			_contextAccessor = contextAccessor;
 		}
 
 		public string GenerateAccessToken(IEnumerable<Claim> claims)
@@ -80,6 +83,15 @@ namespace IntermediaryTransactionsApp.Service
 		{
 			var refreshTokenKey = $"refreshToken:{userId}";
 			await _redisService.RevokeTokenAsync(refreshTokenKey);
+		}
+
+		public int? GetUserIdFromToken()
+		{
+			var claims = _contextAccessor.HttpContext?.User?.Claims;
+			if (claims == null) return null;
+
+			var userIdClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+			return userIdClaim != null ? int.Parse(userIdClaim) : (int?)null;
 		}
 
 	}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Claims;
 using IntermediaryTransactionsApp.Config;
+using IntermediaryTransactionsApp.Constants;
 using IntermediaryTransactionsApp.Db.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,13 +26,13 @@ namespace IntermediaryTransactionsApp.Service
 
 			if (user == null)
 			{
-				throw new UnauthorizedAccessException("Invalid username or password.");
+				throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.InvalidCredentials));
 			}
 
 			var isPasswordValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
 			if (!isPasswordValid)
 			{
-				throw new UnauthorizedAccessException("Invalid username or password.");
+				throw new UnauthorizedAccessException(ErrorMessageExtensions.GetMessage(ErrorMessages.InvalidCredentials));
 			}
 
 			var claims = new List<Claim>

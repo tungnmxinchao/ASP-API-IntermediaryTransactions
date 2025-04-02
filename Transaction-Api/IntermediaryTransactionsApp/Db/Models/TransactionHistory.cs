@@ -11,15 +11,16 @@ namespace IntermediaryTransactionsApp.Db.Models
 		public int? DeletedBy { get; set; }
 
 		public DateTime CreatedAt { get; set; } = DateTime.Now;
-		public DateTime? UpdatedAt { get; set; }
-		public DateTime? DeletedAt { get; set; }
+		public DateTime? UpdatedAt { get; set; } = DateTime.Now;
+
+        public DateTime? DeletedAt { get; set; }
 
 		[Required]
 		public decimal Amount { get; set; }
 
 		[Required]
 		[Range(1, 3)]
-		public int TransactionType { get; set; } // 1: Payment, 2: Refund, 3: Other
+		public int TransactionType { get; set; }
 
 		public bool IsProcessed { get; set; } = false;
 		public string Note { get; set; }

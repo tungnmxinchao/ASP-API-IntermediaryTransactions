@@ -21,13 +21,13 @@ namespace IntermediaryTransactionsApp.Db.Models
 
 		public bool IsActive { get; set; } = true;
 		public DateTime CreatedAt { get; set; } = DateTime.Now;
-		public DateTime? UpdatedAt { get; set; }
+		public DateTime? UpdatedAt { get; set; } = DateTime.Now;
+
+        public decimal Money { get; set; }
 
 		public int RoleId { get; set; }
 		public virtual Role Role { get; set; }
 		public virtual ICollection<LoginHistory> LoginHistories { get; set; }
-		public virtual ICollection<Order> CreatedOrders { get; set; }
-		public virtual ICollection<Order> CustomerOrders { get; set; }
 		public virtual ICollection<Message> Messages { get; set; }
 		public virtual ICollection<TransactionHistory> TransactionHistories { get; set; }
 	}

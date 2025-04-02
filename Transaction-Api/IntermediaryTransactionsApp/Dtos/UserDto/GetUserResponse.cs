@@ -5,6 +5,8 @@ namespace IntermediaryTransactionsApp.Dtos.UserDto
 {
 	public class GetUserResponse : CreateUserResponse
 	{
-		public RoleResponse role { get; set; }
-	}
+        public int Id { get; set; }
+        public RoleResponse role { get; set; }
+        public decimal Money { get; set; }
+    }
 }
