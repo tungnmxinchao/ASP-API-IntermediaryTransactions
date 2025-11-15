@@ -27,8 +27,11 @@ namespace IntermediaryTransactionsApp.Controllers.ZaloPay
         private readonly ApplicationDbContext _context;
         private readonly IUserService _userService;
 
-        public DepositController(IHistoryService historyService, 
-            ApplicationDbContext context, IUserService userService)
+        public DepositController(
+            IHistoryService historyService,
+            ApplicationDbContext context,
+            IUserService userService
+        )
         {
             _historyService = historyService;
             _context = context;
@@ -47,46 +50,54 @@ namespace IntermediaryTransactionsApp.Controllers.ZaloPay
             param.Add("app_time", GetData.GetTimeStamp().ToString());
             param.Add("amount", request.Amount.ToString());
             param.Add("app_trans_id", app_trans_id);
-            param.Add("embed_data", JsonConvert.SerializeObject(new { redirecturl = ZaloConfig.RedirectUrl }));
+            param.Add(
+                "embed_data",
+                JsonConvert.SerializeObject(new { redirecturl = ZaloConfig.RedirectUrl })
+            );
             param.Add("item", JsonConvert.SerializeObject(new[] { new { } }));
             param.Add("description", "Nạp tiền vào ví " + request.UserId);
             param.Add("bank_code", "zalopayapp");
             param.Add("callback_url", ZaloConfig.CallbackUrl);
 
-            var data = string.Join("|", app_id, param["app_trans_id"], param["app_user"], param["amount"], param["app_time"], param["embed_data"], param["item"]);
+            var data = string.Join(
+                "|",
+                app_id,
+                param["app_trans_id"],
+                param["app_user"],
+                param["amount"],
+                param["app_time"],
+                param["embed_data"],
+                param["item"]
+            );
             param.Add("mac", HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, key1, data));
 
             var result = await HttpHelper.PostFormAsync(create_order_url, param);
 
-            await RecordHistory(request.UserId, request.Amount);
+            await RecordHistory(request.UserId, request.Amount, app_trans_id);
 
-            await UpdateUserBalance(request.UserId, request.Amount);
+            //await UpdateUserBalance(request.UserId, request.Amount);
 
             _context.SaveChanges();
 
-
-            var response = new
-            {
-                result = result,
-                app_trans_id = app_trans_id
-            };
+            var response = new { result = result, app_trans_id = app_trans_id };
 
             return Ok(response);
         }
 
-        private async Task RecordHistory(int userId, int amount)
+        private async Task RecordHistory(int userId, int amount, string app_trans_id)
         {
             var historyRequest = new CreateHistoryRequest
             {
                 Amount = amount,
                 TransactionType = (int)UpdateMoneyMode.AddMoney,
                 Note = $"Nạp tiền vào hệ thống cho người dùng: {userId}",
-                Payload = "Giao dịch thành công",
+                Payload = app_trans_id,
                 UserId = userId,
-                OnDoneLink = "None"
+                OnDoneLink = "None",
+                IsProcessed = false,
             };
 
-            await _historyService.CreateHistory(historyRequest);          
+            await _historyService.CreateHistory(historyRequest);
         }
 
         private async Task UpdateUserBalance(int userId, int amount)
@@ -95,15 +106,11 @@ namespace IntermediaryTransactionsApp.Controllers.ZaloPay
             {
                 UserId = userId,
                 Money = amount,
-                TypeUpdate = (int)UpdateMoneyMode.AddMoney
+                TypeUpdate = (int)UpdateMoneyMode.AddMoney,
             };
 
             await _userService.UpdateMoney(updateMoney);
         }
-
-
-
-
     }
 
     public class DepositRequest
