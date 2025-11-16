@@ -12,7 +12,6 @@ using IntermediaryTransactionsApp.Service;
 using IntermediaryTransactionsApp.State;
 using IntermediaryTransactionsApp.UnitOfWork;
 
-
 namespace IntermediaryTransactionsApp.Commands
 {
     public class CreateOrderCommand : ICommand<Order>
@@ -36,7 +35,8 @@ namespace IntermediaryTransactionsApp.Commands
             IHistoryService historyService,
             IUnitOfWorkPersistDb unitOfWorkDb,
             IFeeCalculationService feeCalculationService,
-            IMapper mapper)
+            IMapper mapper
+        )
         {
             _request = request;
             _userId = userId;
@@ -81,8 +81,14 @@ namespace IntermediaryTransactionsApp.Commands
         private Order CreateOrderEntity()
         {
             var feeOnSuccess = _feeCalculationService.CalculateFee(_request.MoneyValue);
-            var totalMoneyForBuyer = _feeCalculationService.CalculateTotalForBuyer(_request.MoneyValue, _request.IsSellerChargeFee);
-            var sellerReceivedOnSuccess = _feeCalculationService.CalculateSellerReceived(_request.MoneyValue, _request.IsSellerChargeFee);
+            var totalMoneyForBuyer = _feeCalculationService.CalculateTotalForBuyer(
+                _request.MoneyValue,
+                _request.IsSellerChargeFee
+            );
+            var sellerReceivedOnSuccess = _feeCalculationService.CalculateSellerReceived(
+                _request.MoneyValue,
+                _request.IsSellerChargeFee
+            );
 
             var order = _mapper.Map<Order>(_request);
             order.CreatedBy = _userId;
@@ -104,7 +110,7 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 UserId = _userId,
                 Money = Constants.Constants.FeeAddNewOrder,
-                TypeUpdate = (int) UpdateMoneyMode.SubMoney
+                TypeUpdate = (int)UpdateMoneyMode.SubMoney,
             };
 
             await _userService.UpdateMoney(updateMoney);
@@ -115,9 +121,10 @@ namespace IntermediaryTransactionsApp.Commands
             var messageRequest = new CreateMessageRequest
             {
                 Subject = $"Hệ thống đã ghi nhận yêu trung gian mã số: {orderId}",
-                Content = $"Hệ thống đã ghi nhận yêu cầu trung gian mã số: {orderId}!\r\nVui lòng nhấn \"CHI TIẾT\" để xem chi tiết yêu cầu trung gian",
+                Content =
+                    $"Hệ thống đã ghi nhận yêu cầu trung gian mã số: {orderId}!\r\nVui lòng nhấn \"CHI TIẾT\" để xem chi tiết yêu cầu trung gian",
                 UserId = _userId,
-                OrderId = orderId
+                OrderId = orderId,
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -128,11 +135,11 @@ namespace IntermediaryTransactionsApp.Commands
             var historyRequest = new CreateHistoryRequest
             {
                 Amount = Constants.Constants.FeeAddNewOrder,
-                TransactionType = (int) UpdateMoneyMode.SubMoney,
+                TransactionType = (int)UpdateMoneyMode.SubMoney,
                 Note = $"Thu phí tạo yêu cầu trung gian mã số: {orderId}",
                 Payload = "Giao dịch thành công",
                 UserId = _userId,
-                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}"
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}",
             };
 
             await _historyService.CreateHistory(historyRequest);
@@ -158,7 +165,8 @@ namespace IntermediaryTransactionsApp.Commands
             IUserService userService,
             IMessageService messageService,
             IHistoryService historyService,
-            IUnitOfWorkPersistDb unitOfWorkDb)
+            IUnitOfWorkPersistDb unitOfWorkDb
+        )
         {
             _request = request;
             _userId = userId;
@@ -203,7 +211,7 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 UserId = _userId,
                 Money = _order.TotalMoneyForBuyer,
-                TypeUpdate = (int) UpdateMoneyMode.SubMoney 
+                TypeUpdate = (int)UpdateMoneyMode.SubMoney,
             };
 
             await _userService.UpdateMoney(updateMoney);
@@ -212,7 +220,7 @@ namespace IntermediaryTransactionsApp.Commands
         private void UpdateOrderStatus()
         {
             _order.Customer = _userId;
-            _order.StatusId = (int) OrderState.BuyerInspecting;
+            _order.StatusId = (int)OrderState.BuyerInspecting;
             _order.Updateable = false;
         }
 
@@ -221,10 +229,10 @@ namespace IntermediaryTransactionsApp.Commands
             var messageRequest = new CreateMessageRequest
             {
                 Subject = $"Hoàn thành xử lý thanh toán giao dịch mã số: {_order.Id}",
-                Content = $"Trạng thái giao dịch: Thành công\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                Content =
+                    $"Trạng thái giao dịch: Thành công\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
                 UserId = _userId,
-                OrderId = _order.Id
-                
+                OrderId = _order.Id,
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -235,11 +243,11 @@ namespace IntermediaryTransactionsApp.Commands
             var historyRequest = new CreateHistoryRequest
             {
                 Amount = order.TotalMoneyForBuyer,
-                TransactionType = (int) UpdateMoneyMode.SubMoney,
+                TransactionType = (int)UpdateMoneyMode.SubMoney,
                 Note = $"Thu phí thực hiện mua đơn hàng mã số: {_order.Id}",
                 Payload = "Giao dịch thành công",
                 UserId = _userId,
-                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{order.Id}"
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{order.Id}",
             };
 
             await _historyService.CreateHistory(historyRequest);
@@ -248,7 +256,6 @@ namespace IntermediaryTransactionsApp.Commands
 
     public class CompleteOrderCommand : ICommand<bool>
     {
-
         private readonly ApplicationDbContext _context;
         private readonly IMessageService _messageService;
         private readonly IUnitOfWorkPersistDb _unitOfWorkDb;
@@ -262,7 +269,8 @@ namespace IntermediaryTransactionsApp.Commands
             Order order,
             ApplicationDbContext context,
             IMessageService messageService,
-            IUnitOfWorkPersistDb unitOfWorkDb)
+            IUnitOfWorkPersistDb unitOfWorkDb
+        )
         {
             _historyService = historyService;
             _userService = userService;
@@ -293,7 +301,7 @@ namespace IntermediaryTransactionsApp.Commands
 
                 await _unitOfWorkDb.CommitAsync();
 
-                return true ;
+                return true;
             }
             catch (Exception)
             {
@@ -311,7 +319,7 @@ namespace IntermediaryTransactionsApp.Commands
                 Note = $"Cộng tiền hoàn thành đơn trung gian mã số: {orderId}",
                 Payload = "Giao dịch thành công",
                 UserId = _order.CreatedBy,
-                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}"
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}",
             };
 
             await _historyService.CreateHistory(historyRequest);
@@ -323,7 +331,7 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 UserId = _order.CreatedBy,
                 Money = _order.SellerReceivedOnSuccess,
-                TypeUpdate = (int) UpdateMoneyMode.AddMoney
+                TypeUpdate = (int)UpdateMoneyMode.AddMoney,
             };
 
             await _userService.UpdateMoney(updateMoney);
@@ -334,20 +342,18 @@ namespace IntermediaryTransactionsApp.Commands
             var messageRequest = new CreateMessageRequest
             {
                 Subject = $"Hoàn thành đơn hàng mã số: {_order.Id}",
-                Content = $"Trạng thái đơng hàng: Hoàn thành\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                Content =
+                    $"Trạng thái đơng hàng: Hoàn thành\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
                 UserId = _order.CreatedBy,
-                OrderId = _order.Id
-                
+                OrderId = _order.Id,
             };
 
             await _messageService.CreateMessage(messageRequest);
         }
-
     }
 
     public class ComplainOrderCommand : ICommand<bool>
     {
-
         private readonly ApplicationDbContext _context;
         private readonly IMessageService _messageService;
         private readonly IUnitOfWorkPersistDb _unitOfWorkDb;
@@ -357,7 +363,8 @@ namespace IntermediaryTransactionsApp.Commands
             Order order,
             ApplicationDbContext context,
             IMessageService messageService,
-            IUnitOfWorkPersistDb unitOfWorkDb)
+            IUnitOfWorkPersistDb unitOfWorkDb
+        )
         {
             _order = order;
             _context = context;
@@ -396,20 +403,18 @@ namespace IntermediaryTransactionsApp.Commands
             var messageRequest = new CreateMessageRequest
             {
                 Subject = $"Ghi nhận khiếu nại đơn hàng mã số: {_order.Id}",
-                Content = $"Trạng thái đơng hàng: Người mua khiếu nại đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                Content =
+                    $"Trạng thái đơng hàng: Người mua khiếu nại đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
                 UserId = _order.CreatedBy,
-                OrderId = _order.Id
-                
+                OrderId = _order.Id,
             };
 
             await _messageService.CreateMessage(messageRequest);
         }
-
     }
 
     public class RequestBuyerCheckOrderCommand : ICommand<bool>
     {
-
         private readonly ApplicationDbContext _context;
         private readonly IMessageService _messageService;
         private readonly IUnitOfWorkPersistDb _unitOfWorkDb;
@@ -419,7 +424,8 @@ namespace IntermediaryTransactionsApp.Commands
             Order order,
             ApplicationDbContext context,
             IMessageService messageService,
-            IUnitOfWorkPersistDb unitOfWorkDb)
+            IUnitOfWorkPersistDb unitOfWorkDb
+        )
         {
             _order = order;
             _context = context;
@@ -458,29 +464,29 @@ namespace IntermediaryTransactionsApp.Commands
             var messageRequest = new CreateMessageRequest
             {
                 Subject = $"Ghi nhận yêu cầu kiểm tra hàng mã số: {_order.Id}",
-                Content = $"Trạng thái đơng hàng: Người bán yều cầu khách hàng kiểm tra lại đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                Content =
+                    $"Trạng thái đơng hàng: Người bán yều cầu khách hàng kiểm tra lại đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
                 UserId = (int)_order.Customer,
-                OrderId = _order.Id
+                OrderId = _order.Id,
             };
 
             await _messageService.CreateMessage(messageRequest);
         }
-
     }
 
     public class CallAdminCommand : ICommand<bool>
     {
-
         private readonly ApplicationDbContext _context;
         private readonly IMessageService _messageService;
         private readonly IUnitOfWorkPersistDb _unitOfWorkDb;
         private readonly Order _order;
 
-        public CallAdminCommand(     
+        public CallAdminCommand(
             Order order,
             ApplicationDbContext context,
             IMessageService messageService,
-            IUnitOfWorkPersistDb unitOfWorkDb)
+            IUnitOfWorkPersistDb unitOfWorkDb
+        )
         {
             _order = order;
             _context = context;
@@ -523,9 +529,10 @@ namespace IntermediaryTransactionsApp.Commands
             var messageRequest = new CreateMessageRequest
             {
                 Subject = $"Yêu cầu admin xử lý hàng mã số: {_order.Id}",
-                Content = $"Trạng thái đơng hàng: Yêu cầu admin xử lý đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
-                UserId = (int) _order.Customer,
-                OrderId = _order.Id
+                Content =
+                    $"Trạng thái đơng hàng: Yêu cầu admin xử lý đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                UserId = (int)_order.Customer,
+                OrderId = _order.Id,
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -536,9 +543,10 @@ namespace IntermediaryTransactionsApp.Commands
             var messageRequest = new CreateMessageRequest
             {
                 Subject = $"Yêu cầu admin xử lý hàng mã số: {_order.Id}",
-                Content = $"Trạng thái đơng hàng: Yêu cầu admin xử lý đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                Content =
+                    $"Trạng thái đơng hàng: Yêu cầu admin xử lý đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
                 UserId = _order.CreatedBy,
-                OrderId = _order.Id
+                OrderId = _order.Id,
             };
 
             await _messageService.CreateMessage(messageRequest);
@@ -549,14 +557,14 @@ namespace IntermediaryTransactionsApp.Commands
             var messageRequest = new CreateMessageRequest
             {
                 Subject = $"Khách hàng yêu quản trị viên xử lý đơn mã số: {_order.Id}",
-                Content = $"Trạng thái đơng hàng: Yêu cầu admin xử lý đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                Content =
+                    $"Trạng thái đơng hàng: Yêu cầu admin xử lý đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
                 UserId = Constants.Constants.AdminId,
-                OrderId = _order.Id
+                OrderId = _order.Id,
             };
 
             await _messageService.CreateMessage(messageRequest);
         }
-
     }
 
     public class SellerCancelOrderCommand : ICommand<bool>
@@ -574,7 +582,8 @@ namespace IntermediaryTransactionsApp.Commands
             Order order,
             ApplicationDbContext context,
             IMessageService messageService,
-            IUnitOfWorkPersistDb unitOfWorkDb)
+            IUnitOfWorkPersistDb unitOfWorkDb
+        )
         {
             _historyService = historyService;
             _userService = userService;
@@ -622,8 +631,8 @@ namespace IntermediaryTransactionsApp.Commands
                 TransactionType = (int)UpdateMoneyMode.AddMoney,
                 Note = $"Hoàn tiền cho người mua do đơn hàng lỗi mã số: {orderId}",
                 Payload = "Giao dịch thành công",
-                UserId = (int) _order.Customer,
-                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}"
+                UserId = (int)_order.Customer,
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}",
             };
 
             await _historyService.CreateHistory(historyRequest);
@@ -633,9 +642,9 @@ namespace IntermediaryTransactionsApp.Commands
         {
             var updateMoney = new UpdateMoneyRequest
             {
-                UserId = (int) _order.Customer,
+                UserId = (int)_order.Customer,
                 Money = _order.TotalMoneyForBuyer,
-                TypeUpdate = (int)UpdateMoneyMode.AddMoney
+                TypeUpdate = (int)UpdateMoneyMode.AddMoney,
             };
 
             await _userService.UpdateMoney(updateMoney);
@@ -646,15 +655,14 @@ namespace IntermediaryTransactionsApp.Commands
             var messageRequest = new CreateMessageRequest
             {
                 Subject = $"Hoàn tiền cho người mua do đơn hàng lỗi mã số: {_order.Id}",
-                Content = $"Trạng thái đơng hàng: Hủy đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                Content =
+                    $"Trạng thái đơng hàng: Hủy đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
                 UserId = (int)_order.Customer,
-                OrderId = _order.Id
-                
+                OrderId = _order.Id,
             };
 
             await _messageService.CreateMessage(messageRequest);
         }
-
     }
 
     public class ResolveOrderCommand : ICommand<bool>
@@ -674,7 +682,8 @@ namespace IntermediaryTransactionsApp.Commands
             Order order,
             ApplicationDbContext context,
             IMessageService messageService,
-            IUnitOfWorkPersistDb unitOfWorkDb)
+            IUnitOfWorkPersistDb unitOfWorkDb
+        )
         {
             _disputeRequest = request;
             _historyService = historyService;
@@ -693,33 +702,44 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 var orderContext = new OrderContext(_order);
 
+                // Hủy đơn
                 await orderContext.CancelOrder();
                 _context.Update(_order);
-            
-                //back money to buyer
-                await UpdateUserBalance();
 
-                // Create record back money for buyer
-                await RecordBackMoneyHistory(_order.Id);
+                // ===============================
+                // 1. XỬ LÝ HOÀN TIỀN CHO NGƯỜI THẮNG
+                // ===============================
+                int refundedUser = _disputeRequest.isSellerCorrect
+                    ? _order.CreatedBy // Seller thắng
+                    : (int)_order.Customer; // Buyer thắng
 
-                int penalizedParty = _order.CreatedBy;
+                await UpdateUserBalance(refundedUser);
 
-                if (_disputeRequest.isSellerCorrect)
-                {
-                    penalizedParty = (int) _order.Customer;
-                }
+                await RecordBackMoneyHistory(_order.Id, refundedUser);
+
+                // ===============================
+                // 2. XỬ LÝ PHẠT BÊN SAI
+                // ===============================
+                int penalizedParty = _disputeRequest.isSellerCorrect
+                    ? (int)_order.Customer // Buyer bị phạt
+                    : _order.CreatedBy; // Seller bị phạt
 
                 await FineGuiltyParty(penalizedParty, Constants.Constants.FeeCallAdmin);
 
-                // Create history sub money for fineGuiltyParty
-                await RecordFineGuiltyPartyHistory(penalizedParty, _order.Id, Constants.Constants.FeeCallAdmin);
+                await RecordFineGuiltyPartyHistory(
+                    penalizedParty,
+                    _order.Id,
+                    Constants.Constants.FeeCallAdmin
+                );
 
-                await NotifyBuyer( (int) _order.Customer);
-
+                // ===============================
+                // 3. GỬI THÔNG BÁO
+                // ===============================
+                await NotifyBuyer((int)_order.Customer);
                 await NotifySeller((int)_order.CreatedBy);
 
+                // Commit tất cả
                 await _unitOfWorkDb.SaveChangesAsync();
-
                 await _unitOfWorkDb.CommitAsync();
 
                 return true;
@@ -737,13 +757,16 @@ namespace IntermediaryTransactionsApp.Commands
             {
                 UserId = penalizedParty,
                 Money = feeCallAdmin,
-                TypeUpdate = (int)UpdateMoneyMode.SubMoney
+                TypeUpdate = (int)UpdateMoneyMode.SubMoney,
             };
             await _userService.UpdateMoney(updateMoney);
-
         }
 
-        private async Task RecordFineGuiltyPartyHistory(int penalizedParty, Guid orderId, decimal money)
+        private async Task RecordFineGuiltyPartyHistory(
+            int penalizedParty,
+            Guid orderId,
+            decimal money
+        )
         {
             var historyRequest = new CreateHistoryRequest
             {
@@ -752,34 +775,34 @@ namespace IntermediaryTransactionsApp.Commands
                 Note = $"Trừ phí phạt do khiếu nại sai đơn hàng: {orderId}",
                 Payload = "Giao dịch thành công",
                 UserId = penalizedParty,
-                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}"
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}",
             };
 
             await _historyService.CreateHistory(historyRequest);
         }
 
-        private async Task RecordBackMoneyHistory(Guid orderId)
+        private async Task RecordBackMoneyHistory(Guid orderId, int userId)
         {
             var historyRequest = new CreateHistoryRequest
             {
                 Amount = _order.TotalMoneyForBuyer,
                 TransactionType = (int)UpdateMoneyMode.AddMoney,
-                Note = $"Hoàn tiền do bị hủy từ đơn hàng: {orderId}",
+                Note = $"Hoàn tiền do hủy đơn hàng: {orderId}",
                 Payload = "Giao dịch thành công",
-                UserId = (int)_order.Customer,
-                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}"
+                UserId = userId,
+                OnDoneLink = $"{Constants.Constants.BaseUrlShareLink}/{orderId}",
             };
 
             await _historyService.CreateHistory(historyRequest);
         }
 
-        private async Task UpdateUserBalance()
+        private async Task UpdateUserBalance(int userId)
         {
             var updateMoney = new UpdateMoneyRequest
             {
-                UserId = (int)_order.Customer,
+                UserId = userId,
                 Money = _order.TotalMoneyForBuyer,
-                TypeUpdate = (int)UpdateMoneyMode.AddMoney
+                TypeUpdate = (int)UpdateMoneyMode.AddMoney,
             };
 
             await _userService.UpdateMoney(updateMoney);
@@ -789,7 +812,7 @@ namespace IntermediaryTransactionsApp.Commands
         {
             CreateMessageRequest messageRequest = BuiltNotification(userId);
 
-             await _messageService.CreateMessage(messageRequest);
+            await _messageService.CreateMessage(messageRequest);
         }
 
         private async Task NotifySeller(int userId)
@@ -804,14 +827,13 @@ namespace IntermediaryTransactionsApp.Commands
             var messageRequest = new CreateMessageRequest
             {
                 Subject = $"Xử lý khiếu nại hoàn tất mã số: {_order.Id}",
-                Content = $"Trạng thái đơng hàng: Hủy đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
+                Content =
+                    $"Trạng thái đơng hàng: Hủy đơn hàng\r\nVui lòng nhấn \"CHI TIẾT\" để đến trang xem giao dịch",
                 UserId = userId,
-                OrderId = _order.Id
+                OrderId = _order.Id,
             };
 
             return messageRequest;
         }
-
     }
-
-} 
+}
