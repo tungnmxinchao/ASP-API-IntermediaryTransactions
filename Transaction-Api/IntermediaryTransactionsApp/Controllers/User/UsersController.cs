@@ -110,12 +110,9 @@ namespace IntermediaryTransactionsApp.Controllers.User
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var (accessToken, refreshToken) = await _authService.Login(
-                request.Username,
-                request.Password
-            );
+            var accessToken = await _authService.Login(request.Username, request.Password);
 
-            var tokenResponse = new TokenResponse(accessToken, refreshToken);
+            var tokenResponse = new TokenResponse(accessToken);
 
             ApiResponse<TokenResponse> apiResponse = new ApiResponse<TokenResponse>(
                 (int)HttpStatusCode.OK,

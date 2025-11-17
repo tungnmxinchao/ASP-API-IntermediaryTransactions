@@ -24,10 +24,7 @@ namespace IntermediaryTransactionsApp.Service
             _redisService = redisService;
         }
 
-        public async Task<(string AccessToken)> Login(
-            string username,
-            string password
-        )
+        public async Task<string> Login(string username, string password)
         {
             var user = await _dbContext
                 .Users.Include(r => r.Role)
