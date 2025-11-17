@@ -126,54 +126,54 @@ namespace IntermediaryTransactionsApp.Controllers.User
             return Ok(apiResponse);
         }
 
-        [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
-        {
-            var accessToken = await _jwtService.RefreshToken(request.UserId, request.RefreshToken);
+        //[HttpPost("refresh-token")]
+        //public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        //{
+        //    var accessToken = await _jwtService.RefreshToken(request.UserId, request.RefreshToken);
 
-            var response = new ApiResponse<string>(
-                code: (int)HttpStatusCode.OK,
-                message: "Token refreshed successfully.",
-                data: accessToken
-            );
+        //    var response = new ApiResponse<string>(
+        //        code: (int)HttpStatusCode.OK,
+        //        message: "Token refreshed successfully.",
+        //        data: accessToken
+        //    );
 
-            return Ok(response);
-        }
+        //    return Ok(response);
+        //}
 
-        [HttpPost("revoke-token")]
-        [Authorize]
-        public async Task<IActionResult> RevokeToken()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //[HttpPost("revoke-token")]
+        //[Authorize]
+        //public async Task<IActionResult> RevokeToken()
+        //{
+        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(
-                    new ApiResponse<string>(
-                        (int)HttpStatusCode.Unauthorized,
-                        "Unauthorized. User ID not found."
-                    )
-                );
-            }
-            try
-            {
-                await _jwtService.RevokeRefreshToken(userId);
+        //    if (string.IsNullOrEmpty(userId))
+        //    {
+        //        return Unauthorized(
+        //            new ApiResponse<string>(
+        //                (int)HttpStatusCode.Unauthorized,
+        //                "Unauthorized. User ID not found."
+        //            )
+        //        );
+        //    }
+        //    try
+        //    {
+        //        await _jwtService.RevokeRefreshToken(userId);
 
-                return Ok(
-                    new ApiResponse<string>((int)HttpStatusCode.OK, "Token revoked successfully.")
-                );
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(
-                    (int)HttpStatusCode.InternalServerError,
-                    new ApiResponse<string>(
-                        500,
-                        "An error occurred while revoking the token.",
-                        ex.Message
-                    )
-                );
-            }
-        }
+        //        return Ok(
+        //            new ApiResponse<string>((int)HttpStatusCode.OK, "Token revoked successfully.")
+        //        );
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(
+        //            (int)HttpStatusCode.InternalServerError,
+        //            new ApiResponse<string>(
+        //                500,
+        //                "An error occurred while revoking the token.",
+        //                ex.Message
+        //            )
+        //        );
+        //    }
+        //}
     }
 }
